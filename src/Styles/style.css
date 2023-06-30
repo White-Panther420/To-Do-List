@@ -10,6 +10,15 @@ html{
     top: 0;
 }
 
+p{
+    font-family: myFont;
+}
+
+h1, 
+h2{
+    font-family: sans-serif;
+}
+
 body{
     display: flex;
     flex-direction: column;
@@ -17,7 +26,6 @@ body{
     margin: 0;
     min-height: 100vh;
     min-width: 100vw;
-    font-family: myFont;
 }
 
 .pageContent{
@@ -33,7 +41,7 @@ body{
     display: flex;
     justify-content: start;
     align-items: center;
-    background-image: linear-gradient(to right, rgb(0, 85, 255), rgb(0, 170, 255) 75%);
+    background-image: linear-gradient(to right, rgb(0, 85, 255) 20%, rgb(0, 170, 255) 75%);
     padding-left: 2%;
     grid-column: 1/-1;
     grid-row: 1/2;
@@ -58,7 +66,7 @@ body{
     grid-template-rows: 1fr 1fr 0.5fr;
     padding: 45px 22px;
     padding-bottom: 0;
-    background-color: rgb(241, 241, 241);
+    background-color: #f7f7f7;
     grid-column: 1/2;
     grid-row: 2/3;
     align-self: stretch;
@@ -69,7 +77,11 @@ body{
     display: flex;
     flex-direction: column;
     gap: 16px;
-    background-color: rgb(241, 241, 241);
+    background-color: #f7f7f7;
+}
+
+#homeOption{
+    background-color: rgb(0, 170, 255);
 }
 
 .optionDiv,
@@ -82,8 +94,9 @@ body{
     padding-left: 26px;
 }
 
-.optionDiv:hover{
-    background-color: rgb(0, 120, 255);
+.optionDiv:hover,
+.projectDiv:hover{
+    border: 1px solid rgb(0, 170, 255)
 }
 
 .optionIcon{
@@ -122,6 +135,7 @@ body{
     margin: 0;
     font-size: 20px;
     color: black;
+    font-family: myFont;
 }
 
 .addProjectBtn,
@@ -140,10 +154,6 @@ body{
     display: flex;
     justify-content: start;
     padding: 12px 20px;
-}
-
-.projectDiv:hover{
-    border: 1px solid rgb(0, 85, 255);
 }
 
 .leftSideDiv,
@@ -197,8 +207,8 @@ body{
     grid-column: 2/-1;
     grid-row: 2/3;
     max-height: 100vh;
-    padding-left: 15%;
-    padding-right: 15%;
+    padding-left: 20%;
+    padding-right: 20%;
 }
 
 .tabTitleDiv{
@@ -237,4 +247,121 @@ body{
     font-size: 20px;
 }
 
-/*TO-DO LIST SECTION*/
+/*TO-DO LIST FORM SECTION*/
+.popUpForm{
+    display: none;
+    position: fixed;
+    top: 68%;
+    left: 50%;
+    z-index: 10;
+    background-color: rgb(255, 255, 255);
+    width: 400px;
+    max-width: 100vw;
+    height: 560px;
+    margin-top: -350px;
+    margin-left: -200px;
+    box-shadow: 1px 1px 5px rgb(176, 174, 174);
+}
+
+.formTitleDiv{
+    display: flex;
+    justify-content: space-between;
+    padding-left: 30px;
+    padding-right: 0;
+    color: white;
+    background-image: linear-gradient(to right, rgb(0, 85, 255), rgb(0, 170, 255) 75%);
+}
+
+.exitBtn{
+    height: 30px;
+    margin-right: 8px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: white;
+    font-weight: 1000;
+}
+
+.form{
+    display: flex;
+    flex-direction: column;
+    padding: 20px 20px;
+    gap: 20px;
+}
+
+.formField{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 700;
+}
+
+.input,
+.select{
+    font-size: 14px;
+    height: 35px;
+    border: 1px solid rgb(230, 228, 228);
+    font-family: myFont;
+    font-weight: 700;
+}
+
+.option,
+.placeHolderMsg{
+    font-weight: 700;
+}
+
+.label{
+    font-family: myFont;
+    color: black;
+    font-size: 16px;
+}
+
+#description{
+    height: 70px;
+}
+
+.input:focus,
+.select:focus{
+    border: 1px solid rgb(0, 85, 255);
+    outline: none;
+}
+
+.select{
+    background-color: white;
+}
+
+.formActionBtnsDiv{
+    display: flex;
+    justify-content: end;
+    margin: 20px auto 0 auto;
+    width: 90%;
+    gap: 20px;
+    height: 45px;
+    padding-right: 0px;
+    padding-top: 16px;
+    border-top: 1px solid rgb(230, 228, 228);
+
+}
+
+.cancelBtn,
+.submitBtn{
+    height: 38px;
+    width: 60px;
+    border: 1px solid rgb(230, 228, 228);
+    background: none;
+}
+
+.submitBtn{
+    font-family: sans-serif;
+    font-weight: 1000;
+    color: white;
+    background-color: rgb(0, 170, 255);
+}
+
+
+
+
+
+.toDoListDiv{
+    height: 150px;
+}

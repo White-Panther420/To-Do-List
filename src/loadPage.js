@@ -48,18 +48,54 @@ const createAnImg = (importedImage, className) =>{
     myImg.classList.add(className)
     return myImg
 }
+const createFormField = (attributeName, inputAttributeType)=>{
+    const formField = createAnElement("div", "formField")
+    const formLabel = createLabel(attributeName)
+    const formInput = createInput(attributeName, inputAttributeType.toLowerCase())
+    formField.appendChild(formLabel)
+    formField.appendChild(formInput)
+    return formField
+}
 const createLabel = (forAttributeName) =>{
     const label = createAnElement("label", "label")
     label.setAttribute("for", forAttributeName.toLowerCase())
     label.textContent = forAttributeName
     return label
 }
-const createInput = (nameAttribute)=>{
+const createInput = (nameAttribute, typeAttributeName)=>{
     const input = createAnElement("input", "input")
-    input.setAttribute("type", "text")
+    input.setAttribute("type", typeAttributeName)
     input.setAttribute("name", nameAttribute.toLowerCase())
     input.setAttribute("id", nameAttribute.toLowerCase())
     return input
+}
+const createPriorityField = ()=>{
+    const formField = createAnElement("div", "formField")
+    const label = createLabel("Priority")
+    formField.appendChild(label)
+    const select = createAnElement("select", "select")
+    select.setAttribute('id', "priority")
+    formField.appendChild(select)
+    
+    const optionsPlaceHolderMsg = createAnElement("option", "placeHolderMsg")
+    optionsPlaceHolderMsg.textContent = "How important is this task?"
+    optionsPlaceHolderMsg.setAttribute("value", "sadasd")
+    optionsPlaceHolderMsg.selected = true
+    optionsPlaceHolderMsg.disabled = true
+
+    select.appendChild(optionsPlaceHolderMsg)
+
+    const options = ["Low", "Medium", "High"]
+    for(let i=0; i<options.length; i++){
+        const option = createAnElement("option", "option")
+        option.setAttribute("value", options[i])
+        option.textContent = options[i]
+        select.appendChild(option)
+    }
+
+    //const formInput = createInput("Priority")
+    //formField.appendChild(formInput)
+    return formField
 }
 /******************** ELEMENT CREATION HELPER FUNCTIONS *********************/
 
@@ -150,6 +186,6 @@ const loadPage = () =>{
 export{
     loadPage,
     createAnElement,
-    createInput,
-    createLabel
+    createFormField,
+    createPriorityField
 }

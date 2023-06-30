@@ -1,28 +1,40 @@
 import "./Styles/style.css"
-import { loadPage, createAnElement, createLabel, createInput } from "./loadPage"
+import { loadPage, createAnElement, createFormField, createPriorityField } from "./loadPage"
 /******************** GUI FUNCTIONS *********************/
 const createForm = ()=>{
     const popUpForm = createAnElement("div", "popUpForm")
+    
+    //Top of form
     const formTitleDiv = createAnElement("div", "formTitleDiv")
     const formTItle = createAnElement("h2", "formTItle")
     formTItle.textContent = "Add Task"
     const exitBtn = createAnElement("button", "exitBtn")
     exitBtn.textContent = "x"
-    formTitleDiv.appendChild(exitBtn)
     formTitleDiv.appendChild(formTItle)
+    formTitleDiv.appendChild(exitBtn)
 
-    const formBody = createAnElement("div", "formBody")
+    //Actual form 
+    const formContainer = createAnElement("div", "formContainer")
     const form = createAnElement("form", "form")
-    formBody.appendChild(form)
+    formContainer.appendChild(form)
     
-    const taskTitleDiv = createAnElement("div", "formField")
-    form.appendChild(taskTitleDiv)
-    const titleLabel = createLabel("Title")
-    const titleInput = createInput("Title")
-    taskTitleDiv.appendChild(titleLabel)
-    taskTitleDiv.appendChild(titleInput)
-    //popUpForm.appendChild(formTitleDiv)
+    form.appendChild(createFormField("Title", "Text"))
+    form.appendChild(createFormField("Description", "Textarea"))
+    form.appendChild(createFormField("Due Date", "Date"))
+    form.appendChild(createPriorityField("Priority"))  //Needs to be made differently
+    
+    const formActionBtnsDiv = createAnElement("div", "formActionBtnsDiv")
+    const cancelBtn = createAnElement("button", "cancelBtn")
+    cancelBtn.textContent = "Cancel"
+    const submitBtn = createAnElement("button", "submitBtn")
+    submitBtn.textContent = "Add"
+    formActionBtnsDiv.appendChild(cancelBtn)
+    formActionBtnsDiv.appendChild(submitBtn)
 
+    popUpForm.appendChild(formTitleDiv)
+    popUpForm.appendChild(formContainer)
+    popUpForm.appendChild(formActionBtnsDiv)
+    return popUpForm
 }
 /******************** GUI FUNCTIONS *********************/
 
@@ -59,7 +71,6 @@ class Task{
     setPriority(priority){
         return this.priority = priority
     }
-    
 }
 
 class ToDoList{
@@ -68,17 +79,23 @@ class ToDoList{
     }
 }
 
+//Load the constant part of page (header, sidebar, and some of body)
 const content = document.querySelector("#content")
-content.appendChild(loadPage())
 
+const popUpForm = createForm()
+content.appendChild(loadPage())  
+content.appendChild(popUpForm)
 
+const homeOption = document.querySelector(".optionDiv")
+homeOption.setAttribute("id", "homeOption")
+
+//Dynamic portion that will be below task header
+const toDoMainContent = document.querySelector(".toDoMainContent") 
 const toDoListDiv = createAnElement("div", "toDoListDiv")
+toDoMainContent.appendChild(toDoListDiv) 
+
 const newList = new ToDoList()  //New array to store task objects
 
-const addTaskbtn = document.querySelector(".addTaskBtn")
-addTaskbtn.addEventListener("click", ()=>{
-    newList.push(createNewTask())
-})
 
 const createNewTask = ()=>{
 
@@ -98,11 +115,29 @@ const createNewTask = ()=>{
 
 
 
-
-
-
-
-
+const formTag = document.querySelector(".form")
+const addTaskbtn = document.querySelector(".addTaskBtn")
+addTaskbtn.addEventListener("click", ()=>{
+    popUpForm.style.display = "block"
+    //newList.push(createNewTask())
+})
+const exitFormBtn = document.querySelector(".exitBtn")
+exitFormBtn.addEventListener("click", ()=>{
+    popUpForm.style.display = "none"
+    formTag.reset()  //Clears the form
+    //e.preventDefault();  //Prevents form from sending data to backend by default
+})
+const cancelBtn = document.querySelector(".cancelBtn")
+cancelBtn.addEventListener("click", ()=>{
+    popUpForm.style.display = "none"
+    formTag.reset()  //Clears the form
+})
+const submitBtn = document.querySelector(".submitBtn")
+submitBtn.addEventListener("click", (e)=>{
+    popUpForm.style.display = "none"
+    formTag.reset()  //Clears the form
+    e.preventDefault();  //Prevents form from sending data to backend by default
+})
 
 
 
