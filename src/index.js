@@ -13,7 +13,8 @@ import { createAnElement, createAnImg, createForm, createInput } from "./formAnd
 const content = document.querySelector("#content")
 
 const popUpForm = createForm()
-content.appendChild(loadPage())  
+const pageContent = loadPage()
+content.appendChild(pageContent)
 content.appendChild(popUpForm)
 
 const homeOption = document.querySelector(".optionDiv")
@@ -65,11 +66,12 @@ toDoMainContent.appendChild(toDoListDiv)
 
 
 class Task{
-    constructor(title, description, dueDate, priority){
+    constructor(title, description, dueDate, priority="low", isComplete="false"){
         this.title = title
         this.description = description
         this.dueDate = dueDate
         this.priority = priority
+        this.isComplete = isComplete
     }
 
     //Getters
@@ -85,6 +87,9 @@ class Task{
     get getPriorityLevel(){
         return this.priority
     }
+    get getCompletionState(){
+        return this.isComplete
+    }
 
     //Setters
     set setTaskName(title){
@@ -98,6 +103,9 @@ class Task{
     }
     set setTriorityLevel(priority){
         return this.priority = priority
+    }
+    set setCompletionState(isComplete){
+        return this.isComplete = isComplete
     }
 }
 
@@ -113,8 +121,14 @@ class ToDoList{
             console.log("Task Name: " + task.taskName)
         });
     }
+    getListLength(){
+        return this.list.length
+    }
     getLastTask(){
         return this.list[this.list.length-1]
+    }
+    searchTask(taskIndex){
+        return this.list[taskIndex]
     }
 }
 
@@ -125,44 +139,117 @@ const newList = new ToDoList()  //New array to store task objects
 const addTaskbtn = document.querySelector(".addTaskBtn")
 addTaskbtn.addEventListener("click", ()=>{
     popUpForm.style.display = "block"  //Have user fill out form and put the info into newList
+    pageContent.style.filter = "blur(4px)"
 })
 
-const createNewTask = ()=>{
+const createNewTask = (taskTitle, taskDescr, taskDueDate, taskPriority)=>{
+    let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "false")
+    newList.addTask(newTask)
+}   
+const createTaskGUI = ()=>{
     const taskContainer = createAnElement("div", "taskContainer")
-    
+    taskContainer.setAttribute("data-state", newList.getListLength()-1)  //Link each GUI task to console task stored in newList
+    const lastTask = newList.getLastTask() 
+
     const leftTaskSideDiv = createAnElement("div", "leftTaskSideDiv")
     const completedCheckCircle = createInput("completed", "checkbox")
+    completedCheckCircle.classList.remove("input")
+    completedCheckCircle.classList.add("complete", `${lastTask.getPriorityLevel.toLowerCase()}`)
     const taskNameP = createAnElement("p", "taskNameP")
-    taskNameP.textContent = newList.getLastTask().getTaskName
+    taskNameP.textContent = lastTask.getTaskName
     leftTaskSideDiv.appendChild(completedCheckCircle)
     leftTaskSideDiv.appendChild(taskNameP)
 
     const rightTaskSideDiv = createAnElement("div", "rightTaskSideDiv")
     const dueDateP = createAnElement("p", "dueDateP")
-    dueDateP.textContent = newList.getLastTask().getDuedate
+    if(newList.getLastTask().getDuedate === ""){
+        dueDateP.textContent = "No due date"
+    }else{
+        dueDateP.textContent = newList.getLastTask().getDuedate
+    }
     rightTaskSideDiv.appendChild(dueDateP)
 
-    const icons = [EditIcon, DeleteIcon, InfoIcon]
-    for(let i=0; i<icons.length; i++){
-        rightTaskSideDiv.appendChild(createAnImg(icons[i], "taskOptionIcon"))
-    }
+    const editIcon = createAnImg(EditIcon, "taskOptionIcon")
+    editIcon.addEventListener("click", ()=>{
+
+    })
+    const deleteIcon = createAnImg(DeleteIcon, "taskOptionIcon")
+    deleteIcon.addEventListener("click", ()=>{
+        
+    })
+    const infoIcon = createAnImg(InfoIcon, "taskOptionIcon")
+    infoIcon.addEventListener("click", ()=>{
+        displayTaskInformation(newList.searchTask(taskContainer.getAttribute("data-state")), taskContainer)
+    })
+    rightTaskSideDiv.appendChild(editIcon)
+    rightTaskSideDiv.appendChild(deleteIcon)
+    rightTaskSideDiv.appendChild(infoIcon)
+
+    completedCheckCircle.addEventListener("click", ()=>{
+        displayTaskStatus(completedCheckCircle, taskNameP)
+        updateTaskStatus(taskContainer.getAttribute("data-state"))
+    })
 
     taskContainer.appendChild(leftTaskSideDiv)
     taskContainer.appendChild(rightTaskSideDiv)
     return taskContainer
-
-}   
-
-
-const addNewTaskToGUI = ()=>{
-
 }
 
+const displayTaskStatus = (checkButton, taskTitle) =>{
+    if(checkButton.checked === true){  //Button currently not checked
+        taskTitle.setAttribute("id", "completedTask")
+        checkButton.setAttribute("id", "isCompleteBtn")
+    }else{  //Uncheck button
+        taskTitle.removeAttribute("id", "completedTask")
+        checkButton.removeAttribute("id", "isCompleteBtn")
+    }
+}
+const updateTaskStatus = (taskContainerIndex)=>{
+    const currentTask = newList.searchTask(taskContainerIndex)
+    currentTask.getCompletionState === "false" ?  currentTask.setCompletionState="true" : currentTask.setCompletionState="false"
+}
+
+const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
+    const infoContainer = createAnElement("div", "infoContainer")
+    const infoTitleDiv = createAnElement("div", "infoTitleDiv")
+    const infoTitle = createAnElement("h2", "infoTitle")
+    infoTitle.textContent = "Edit Task"
+    const infoExitBtn = createAnElement("button", "exitBtn")
+    infoExitBtn.textContent = "x"
+    infoExitBtn.addEventListener("click", ()=>{
+        infoContainer.style.display = "none"
+    })
+    infoTitleDiv.appendChild(infoTitle)
+    infoTitleDiv.appendChild(infoExitBtn)
+
+    const infoSectionDiv = createAnElement("div", "infoSectionDiv")
+    const infoCardTitles = ["Title" , "Description", "Due date", "Priority",  "Completion Status"]
+    const infoCardContent = [currentTaskIndex.getTaskName, currentTaskIndex.getTaskDescr, currentTaskIndex.getDuedate, currentTaskIndex.getPriorityLevel, currentTaskIndex.getCompletionState]
+    for(let i=0; i<5; i++){
+        const infoDiv = createAnElement("div", "infoDiv")
+        const cardTitle = createAnElement("h3", "cardTitle")
+        cardTitle.textContent = infoCardTitles[i]
+        const cardContent = createAnElement("p", "cardContent")
+        cardContent.textContent = infoCardContent[i]
+        infoDiv.appendChild(cardTitle)
+        infoDiv.appendChild(cardContent)
+        infoSectionDiv.appendChild(infoDiv)
+    }
+
+    const infoActionDiv = createAnElement("div", "infoActionDiv")
+    const infoCancelBtn = createAnElement("button", "infoCancelBtn")
+    infoCancelBtn.textContent = "Cancel"
+    infoActionDiv.appendChild(infoCancelBtn)
 
 
+    infoContainer.appendChild(infoTitleDiv)
+    infoContainer.appendChild(infoSectionDiv)
+    infoContainer.appendChild(infoActionDiv)
 
-
-
+    currentTaskContainer.appendChild(infoContainer)
+    
+    infoContainer.style.display = "block"
+}
 
 
 
@@ -174,11 +261,13 @@ const formTag = document.querySelector(".form")
 const exitFormBtn = document.querySelector(".exitBtn")
 exitFormBtn.addEventListener("click", ()=>{
     popUpForm.style.display = "none"
+    pageContent.style.filter = "blur(0px)"
     formTag.reset()  //Clears the form
 })
 const cancelBtn = document.querySelector(".cancelBtn")
 cancelBtn.addEventListener("click", ()=>{
     popUpForm.style.display = "none"
+    pageContent.style.filter = "blur(0px)"
     formTag.reset()  //Clears the form
 })
 const submitBtn = document.querySelector(".submitBtn")
@@ -188,12 +277,12 @@ submitBtn.addEventListener("click", (e)=>{
     const taskDueDate = document.getElementById("due_date").value
     const taskPriority = document.getElementById("priority").value
 
-    //Store values in general todo list
-    let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority)
-    newList.addTask(newTask)
-    toDoListDiv.appendChild(createNewTask()) //Create GUI for task
-    console.log(newList)
+    createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
+    toDoListDiv.appendChild(createTaskGUI()) //Create GUI for task
+  
     popUpForm.style.display = "none"
+    pageContent.style.filter = "blur(0px)"
+
     formTag.reset()  //Clears the form
     e.preventDefault();  //Prevents form from sending data to backend by default
 })

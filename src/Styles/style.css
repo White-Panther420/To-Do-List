@@ -253,7 +253,8 @@ body{
 }
 
 /*TO-DO LIST FORM SECTION*/
-.popUpForm{
+.popUpForm,
+.infoContainer{
     display: none;
     position: fixed;
     top: 68%;
@@ -268,7 +269,8 @@ body{
     box-shadow: 1px 1px 5px rgb(176, 174, 174);
 }
 
-.formTitleDiv{
+.formTitleDiv,
+.infoTitleDiv{
     display: flex;
     justify-content: space-between;
     padding-left: 30px;
@@ -302,7 +304,8 @@ body{
 }
 
 .input,
-.select{
+.select,
+.complete{
     font-size: 14px;
     height: 35px;
     border: 1px solid rgb(230, 228, 228);
@@ -337,7 +340,8 @@ body{
     background-color: white;
 }
 
-.formActionBtnsDiv{
+.formActionBtnsDiv,
+.infoActionDiv{
     display: flex;
     justify-content: end;
     margin: -10px auto 0 auto;
@@ -349,7 +353,8 @@ body{
 }
 
 .cancelBtn,
-.submitBtn{
+.submitBtn,
+.infoCancelBtn{
     height: 38px;
     width: 60px;
     border: 1px solid rgb(230, 228, 228);
@@ -378,7 +383,7 @@ body{
 }
 
 .taskContainer:hover{
-    background-color: rgb(241, 241, 241);
+    background-color: #f7f7f7
 }
 
 .leftTaskSideDiv,
@@ -393,21 +398,37 @@ body{
     gap: 8px;
 }
 
-#completed{
+.complete{  /*Check button (unchecked*/
+    margin-top: 0px;
     appearance: none;
-    border: 1px solid green;
     background-color: white;
     border-radius: 50%;
     width: 18px;
     height: 18px;
 }
 
+#isCompleteBtn{ /*Check button (checked*/
+    background-color: rgb(0, 170, 255);
+}
+
+.low{
+    border: 1px solid rgb(44, 221, 44);
+}
+
+.medium{
+    border: 1px solid rgb(227, 206, 16)
+}
+
+.high{
+    border: 1px solid rgb(231, 32, 32)
+}
+
 .taskNameP,
 .dueDateP{
     margin: 0;
-    margin-top: -1px;
+    margin-top: -5px;
     color:black;
-    font-size: 18px;
+    font-size: 16px;
 }
 
 .dueDateP{
@@ -420,4 +441,57 @@ body{
 .taskOptionIcon{
     width: 20px;
     height: 20px;
+    margin-top: -3px;
+}
+
+#completedTask{  /*Task Title*/
+    text-decoration: line-through;
+    text-decoration-color: rgb(44, 37, 37);
+    text-decoration-thickness: 1px;
+}
+
+/*TASK SECTIOn: INFO ICON*/
+.infoContainer{
+    width: 425px;
+}
+
+.infoSectionDiv{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 30px 20px;
+}
+
+.infoDiv{
+    display: grid;
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: 0.5fr 1fr;
+    grid-template-rows: 1fr;
+    border-bottom: 1px solid rgb(235, 235, 235);
+    min-width: 100%;
+    min-height: 50px;
+    padding: 8px;
+}
+
+.infoSectionDiv > :nth-child(2){
+    grid-column: 1/2;
+    grid-row: 1/2;
+    min-height: 100%
+}
+
+.infoSectionDiv > :nth-child(2) > :nth-child(2){ /*Target description cell*/
+    overflow-y: scroll;
+    grid-column: 2/-1;
+    grid-row: 1/2;
+    max-height: 95px;
+    padding-right: 8px;;
+
+}
+
+.cardTitle,
+.cardContent{
+    margin: 0;
+    font-size: 16px;
 }
