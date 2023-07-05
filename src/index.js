@@ -1,12 +1,11 @@
 import "./Styles/style.css"
+import {ToDoList} from "./List.js" 
 import EditIcon from "./Assets/Edit.png"
 import DeleteIcon from "./Assets/Delete.png"
 import InfoIcon from "./Assets/Info.png"
 import { loadPage, loadMainBodyContent} from "./loadPage"
 import { createAnElement, createAnImg, createForm, createInput } from "./formAndElements"
-/******************** GUI FUNCTIONS *********************/
 
-/******************** GUI FUNCTIONS *********************/
 
 
 //Load the constant part of page (header, sidebar, and some of body)
@@ -30,112 +29,55 @@ toDoMainContent.appendChild(toDoListDiv)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Task{
-    constructor(title, description, dueDate, priority="Low", isComplete="Incomplete"){
-        this.title = title
-        this.description = description
-        this.dueDate = dueDate
-        this.priority = priority
-        this.isComplete = isComplete
-    }
-
-    //Getters
-    get getTaskName(){
-        return this.title
-    }
-    get getTaskDescr(){
-        return this.description
-    }
-    get getDuedate(){
-        return this.dueDate
-    }
-    get getPriorityLevel(){
-        return this.priority
-    }
-    get getCompletionState(){
-        return this.isComplete
-    }
-
-    //Setters
-    set setTaskName(title){
-        return this.title = title
-    }
-    set setTaskDescr(description){
-        return this.description = description
-    }
-    set setTuedate(dueDate){
-        return this.dueDate = dueDate
-    }
-    set setTriorityLevel(priority){
-        return this.priority = priority
-    }
-    set setCompletionState(isComplete){
-        return this.isComplete = isComplete
-    }
-
-    //Methods
-}
-
-class ToDoList{
-    constructor(){
-        this.list = []
-    }
-    addTask(task){
-        this.list.push(task)
-    }
-    printTask(){
-        this.list.forEach(task => {
-            console.log("Task Name: " + task.taskName)
-        });
-    }
-    getListLength(){
-        return this.list.length
-    }
-    getLastTask(){
-        return this.list[this.list.length-1]
-    }
-    searchTask(taskIndex){
-        return this.list[taskIndex]
-    }
-}
-
 const newList = new ToDoList()  //New array to store task objects
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -145,11 +87,105 @@ addTaskbtn.addEventListener("click", ()=>{
     modal.style.display = "block"
 })
 
-const createNewTask = (taskTitle, taskDescr, taskDueDate, taskPriority)=>{
-    let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "Incomplete")
-    newList.addTask(newTask)
-}   
-const createTaskGUI = ()=>{
+
+
+
+
+
+
+
+
+
+
+
+
+
+//FORM HANDLING
+const formTag = document.querySelector(".form")
+const exitFormBtn = document.querySelector(".exitBtn")
+exitFormBtn.addEventListener("click", ()=>{
+    closeForm()
+})
+const cancelBtn = document.querySelector(".cancelBtn")
+cancelBtn.addEventListener("click", ()=>{
+    closeForm()
+})
+const submitBtn = document.querySelector(".submitBtn")
+submitBtn.addEventListener("click", (e)=>{
+    const taskTitle = document.getElementById("title").value
+    const taskDescr = document.getElementById("description").value
+    const taskDueDate = document.getElementById("due_date").value
+    const taskPriority = document.getElementById("priority").value
+
+    newList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
+    toDoListDiv.appendChild(displayTaskGUI()) //Create GUI for task
+
+    closeForm()
+    e.preventDefault();  //Prevents form from sending data to backend by default
+})
+
+const mainSidebarOptions = document.querySelectorAll(".optionDiv")
+mainSidebarOptions.forEach(option => {
+    option.addEventListener("click", ()=>{
+        pageContent.removeChild(toDoMainContent)
+        toDoMainContent = loadMainBodyContent(option.textContent)
+        pageContent.appendChild(toDoMainContent)
+        let optionIcon = option.querySelector("img")
+        let optionIconSrc = optionIcon.getAttribute("src")
+        const tabIcon = document.querySelector(".tabIcon")
+        tabIcon.setAttribute("src", optionIconSrc)
+        const tabTitle = document.querySelector(".tabTitle")
+        tabTitle.textContent = option.textContent
+        mainSidebarOptions.forEach(option =>{
+            option.removeAttribute("id")
+        })
+        option.setAttribute("id", "selecetedOption")
+    })
+});
+const closeForm=() =>{
+    popUpForm.style.display = "none"
+    modal.style.display = "none"
+    formTag.reset()  //Clears the form
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/******************** GUI FUNCTIONS *********************/
+const displayTaskGUI =()=>{
     const taskContainer = createAnElement("div", "taskContainer")
     taskContainer.setAttribute("data-state", newList.getListLength()-1)  //Link each GUI task to console task stored in newList
     const lastTask = newList.getLastTask() 
@@ -165,10 +201,10 @@ const createTaskGUI = ()=>{
 
     const rightTaskSideDiv = createAnElement("div", "rightTaskSideDiv")
     const dueDateP = createAnElement("p", "dueDateP")
-    if(newList.getLastTask().getDuedate === ""){
+    if(lastTask.getDuedate === ""){
         dueDateP.textContent = "No due date"
     }else{
-        dueDateP.textContent = newList.getLastTask().getDuedate
+        dueDateP.textContent = lastTask.getDuedate
     }
     rightTaskSideDiv.appendChild(dueDateP)
 
@@ -191,26 +227,12 @@ const createTaskGUI = ()=>{
 
     completedCheckCircle.addEventListener("click", ()=>{
         displayTaskStatus(completedCheckCircle, taskNameP)
-        updateTaskStatus(taskContainer.getAttribute("data-state"))
+        newList.updateTaskStatus(taskContainer.getAttribute("data-state"))
     })
 
     taskContainer.appendChild(leftTaskSideDiv)
     taskContainer.appendChild(rightTaskSideDiv)
     return taskContainer
-}
-
-const displayTaskStatus = (checkButton, taskTitle) =>{
-    if(checkButton.checked === true){  //Button currently not checked
-        taskTitle.setAttribute("id", "completedTask")
-        checkButton.setAttribute("id", "isCompleteBtn")
-    }else{  //Uncheck button
-        taskTitle.removeAttribute("id", "completedTask")
-        checkButton.removeAttribute("id", "isCompleteBtn")
-    }
-}
-const updateTaskStatus = (taskContainerIndex)=>{
-    const currentTask = newList.searchTask(taskContainerIndex)
-    currentTask.getCompletionState === "Incomplete" ?  currentTask.setCompletionState="Complete" : currentTask.setCompletionState="Incomplete"
 }
 
 const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
@@ -259,59 +281,13 @@ const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
     
     infoContainer.style.display = "block"
 }
-
-
-
-
-
-
-//FORM HANDLING
-const formTag = document.querySelector(".form")
-const exitFormBtn = document.querySelector(".exitBtn")
-exitFormBtn.addEventListener("click", ()=>{
-    closeForm()
-})
-const cancelBtn = document.querySelector(".cancelBtn")
-cancelBtn.addEventListener("click", ()=>{
-    closeForm()
-})
-const submitBtn = document.querySelector(".submitBtn")
-submitBtn.addEventListener("click", (e)=>{
-    const taskTitle = document.getElementById("title").value
-    const taskDescr = document.getElementById("description").value
-    const taskDueDate = document.getElementById("due_date").value
-    const taskPriority = document.getElementById("priority").value
-
-    createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
-    toDoListDiv.appendChild(createTaskGUI()) //Create GUI for task
-
-    closeForm()
-    e.preventDefault();  //Prevents form from sending data to backend by default
-})
-
-const mainSidebarOptions = document.querySelectorAll(".optionDiv")
-mainSidebarOptions.forEach(option => {
-    option.addEventListener("click", ()=>{
-        pageContent.removeChild(toDoMainContent)
-        toDoMainContent = loadMainBodyContent(option.textContent)
-        pageContent.appendChild(toDoMainContent)
-        let optionIcon = option.querySelector("img")
-        let optionIconSrc = optionIcon.getAttribute("src")
-        const tabIcon = document.querySelector(".tabIcon")
-        tabIcon.setAttribute("src", optionIconSrc)
-        const tabTitle = document.querySelector(".tabTitle")
-        tabTitle.textContent = option.textContent
-        mainSidebarOptions.forEach(option =>{
-            option.removeAttribute("id")
-        })
-        option.setAttribute("id", "selecetedOption")
-    })
-});
-
-
-const closeForm=() =>{
-    popUpForm.style.display = "none"
-    modal.style.display = "none"
-
-    formTag.reset()  //Clears the form
+const displayTaskStatus = (checkButton, taskTitle)=>{
+    if(checkButton.checked === true){  //Button currently not checked
+        taskTitle.setAttribute("id", "completedTask")
+        checkButton.setAttribute("id", "isCompleteBtn")
+    }else{  //Uncheck button
+        taskTitle.removeAttribute("id", "completedTask")
+        checkButton.removeAttribute("id", "isCompleteBtn")
+    }
 }
+/******************** GUI FUNCTIONS *********************/
