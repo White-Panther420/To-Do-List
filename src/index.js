@@ -2,7 +2,7 @@ import "./Styles/style.css"
 import EditIcon from "./Assets/Edit.png"
 import DeleteIcon from "./Assets/Delete.png"
 import InfoIcon from "./Assets/Info.png"
-import { loadPage} from "./loadPage"
+import { loadPage, loadMainBodyContent} from "./loadPage"
 import { createAnElement, createAnImg, createForm, createInput } from "./formAndElements"
 /******************** GUI FUNCTIONS *********************/
 
@@ -17,12 +17,14 @@ const pageContent = loadPage()
 content.appendChild(pageContent)
 content.appendChild(popUpForm)
 
+const modal = document.querySelector(".modal")
+
 const homeOption = document.querySelector(".optionDiv")
-homeOption.setAttribute("id", "homeOption")
+homeOption.setAttribute("id", "selecetedOption")
 
 //Dynamic portion that will be below task header
-const toDoMainContent = document.querySelector(".toDoMainContent") 
-const toDoListDiv = createAnElement("div", "toDoListDiv")
+let toDoMainContent = document.querySelector(".toDoMainContent") 
+const toDoListDiv = createAnElement("div", "toDoListDiv") //Container to hold tasks
 toDoMainContent.appendChild(toDoListDiv) 
 
 
@@ -64,9 +66,8 @@ toDoMainContent.appendChild(toDoListDiv)
 
 
 
-
 class Task{
-    constructor(title, description, dueDate, priority="low", isComplete="false"){
+    constructor(title, description, dueDate, priority="Low", isComplete="Incomplete"){
         this.title = title
         this.description = description
         this.dueDate = dueDate
@@ -107,6 +108,8 @@ class Task{
     set setCompletionState(isComplete){
         return this.isComplete = isComplete
     }
+
+    //Methods
 }
 
 class ToDoList{
@@ -139,11 +142,11 @@ const newList = new ToDoList()  //New array to store task objects
 const addTaskbtn = document.querySelector(".addTaskBtn")
 addTaskbtn.addEventListener("click", ()=>{
     popUpForm.style.display = "block"  //Have user fill out form and put the info into newList
-    pageContent.style.filter = "blur(4px)"
+    modal.style.display = "block"
 })
 
 const createNewTask = (taskTitle, taskDescr, taskDueDate, taskPriority)=>{
-    let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "false")
+    let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "Incomplete")
     newList.addTask(newTask)
 }   
 const createTaskGUI = ()=>{
@@ -179,6 +182,7 @@ const createTaskGUI = ()=>{
     })
     const infoIcon = createAnImg(InfoIcon, "taskOptionIcon")
     infoIcon.addEventListener("click", ()=>{
+        modal.style.display = "block"
         displayTaskInformation(newList.searchTask(taskContainer.getAttribute("data-state")), taskContainer)
     })
     rightTaskSideDiv.appendChild(editIcon)
@@ -206,7 +210,7 @@ const displayTaskStatus = (checkButton, taskTitle) =>{
 }
 const updateTaskStatus = (taskContainerIndex)=>{
     const currentTask = newList.searchTask(taskContainerIndex)
-    currentTask.getCompletionState === "false" ?  currentTask.setCompletionState="true" : currentTask.setCompletionState="false"
+    currentTask.getCompletionState === "Incomplete" ?  currentTask.setCompletionState="Complete" : currentTask.setCompletionState="Incomplete"
 }
 
 const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
@@ -218,6 +222,7 @@ const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
     infoExitBtn.textContent = "x"
     infoExitBtn.addEventListener("click", ()=>{
         infoContainer.style.display = "none"
+        modal.style.display = "none"
     })
     infoTitleDiv.appendChild(infoTitle)
     infoTitleDiv.appendChild(infoExitBtn)
@@ -239,6 +244,10 @@ const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
     const infoActionDiv = createAnElement("div", "infoActionDiv")
     const infoCancelBtn = createAnElement("button", "infoCancelBtn")
     infoCancelBtn.textContent = "Cancel"
+    infoCancelBtn.addEventListener("click", ()=>{
+        infoContainer.style.display = "none"
+        modal.style.display = "none"
+    })
     infoActionDiv.appendChild(infoCancelBtn)
 
 
@@ -260,15 +269,11 @@ const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
 const formTag = document.querySelector(".form")
 const exitFormBtn = document.querySelector(".exitBtn")
 exitFormBtn.addEventListener("click", ()=>{
-    popUpForm.style.display = "none"
-    pageContent.style.filter = "blur(0px)"
-    formTag.reset()  //Clears the form
+    closeForm()
 })
 const cancelBtn = document.querySelector(".cancelBtn")
 cancelBtn.addEventListener("click", ()=>{
-    popUpForm.style.display = "none"
-    pageContent.style.filter = "blur(0px)"
-    formTag.reset()  //Clears the form
+    closeForm()
 })
 const submitBtn = document.querySelector(".submitBtn")
 submitBtn.addEventListener("click", (e)=>{
@@ -279,21 +284,34 @@ submitBtn.addEventListener("click", (e)=>{
 
     createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
     toDoListDiv.appendChild(createTaskGUI()) //Create GUI for task
-  
-    popUpForm.style.display = "none"
-    pageContent.style.filter = "blur(0px)"
 
-    formTag.reset()  //Clears the form
+    closeForm()
     e.preventDefault();  //Prevents form from sending data to backend by default
 })
 
 const mainSidebarOptions = document.querySelectorAll(".optionDiv")
 mainSidebarOptions.forEach(option => {
     option.addEventListener("click", ()=>{
-        // let optionIcon = option.getElementByTagName(img)
-        // tabIcon.src = optionIcon.src
-        // console.log(option.src)
+        pageContent.removeChild(toDoMainContent)
+        toDoMainContent = loadMainBodyContent(option.textContent)
+        pageContent.appendChild(toDoMainContent)
+        let optionIcon = option.querySelector("img")
+        let optionIconSrc = optionIcon.getAttribute("src")
+        const tabIcon = document.querySelector(".tabIcon")
+        tabIcon.setAttribute("src", optionIconSrc)
         const tabTitle = document.querySelector(".tabTitle")
         tabTitle.textContent = option.textContent
+        mainSidebarOptions.forEach(option =>{
+            option.removeAttribute("id")
+        })
+        option.setAttribute("id", "selecetedOption")
     })
 });
+
+
+const closeForm=() =>{
+    popUpForm.style.display = "none"
+    modal.style.display = "none"
+
+    formTag.reset()  //Clears the form
+}

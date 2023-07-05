@@ -88,7 +88,7 @@ const createPriorityField = ()=>{
     
     const optionsPlaceHolderMsg = createAnElement("option", "placeHolderMsg")
     optionsPlaceHolderMsg.textContent = "How important is this task?"
-    optionsPlaceHolderMsg.setAttribute("value", "low")
+    optionsPlaceHolderMsg.setAttribute("value", "Low")
     optionsPlaceHolderMsg.selected = true
     optionsPlaceHolderMsg.disabled = true
 

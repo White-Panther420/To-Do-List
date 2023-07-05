@@ -43,6 +43,9 @@ const createProject = (projectName) =>{
 const loadPage = () =>{
     //HEADER
     const pageContent = createAnElement("div", "pageContent")
+    const modal = createAnElement("div", "modal")
+    pageContent.appendChild(modal)
+
     const headerDiv = createAnElement("div", "headerDiv")
     const pageTitle = createAnElement("h1", "pageTitle")
     const siteLogo = createAnImg(Logo, "siteLogo")
@@ -91,6 +94,14 @@ const loadPage = () =>{
 
     sideBarDiv.appendChild(footer)
 
+    pageContent.appendChild(headerDiv)
+    pageContent.appendChild(sideBarDiv)
+    pageContent.appendChild(loadMainBodyContent("Home"))
+    
+    return pageContent
+}
+
+const loadMainBodyContent=(option)=>{
     //TO-DO LIST
     const toDoMainContent = createAnElement("div", "toDoMainContent")
     const tabTitleDiv = createAnElement("div", "tabTitleDiv")
@@ -105,23 +116,23 @@ const loadPage = () =>{
     taksAndToDoDIv.appendChild(taskDiv)
     const taskP = createAnElement("p", "taskP")
     taskP.textContent = "Tasks"
+    taskDiv.appendChild(taskP)
     const numTasks = createAnElement("p", "numTasks")
     numTasks.textContent = "(0)"
-    const addTaskBtn = createAnElement("button", "addTaskBtn")
-    taskDiv.appendChild(taskP)
     taskP.appendChild(numTasks)
-    taskDiv.appendChild(addTaskBtn)
+
+    if(option !== "Important" && option !== "Completed"){
+        const addTaskBtn = createAnElement("button", "addTaskBtn")
+        taskDiv.appendChild(addTaskBtn)
+    }   
     
     toDoMainContent.appendChild(tabTitleDiv)
     toDoMainContent.appendChild(taksAndToDoDIv)
-
-    pageContent.appendChild(headerDiv)
-    pageContent.appendChild(sideBarDiv)
-    pageContent.appendChild(toDoMainContent)
-    return pageContent
+    return toDoMainContent
 }
 
 
 export{
-    loadPage
+    loadPage,
+    loadMainBodyContent
 }
