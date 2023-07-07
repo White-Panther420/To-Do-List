@@ -1,5 +1,5 @@
 import "./Styles/style.css"
-import { createAnElement, createAnImg } from "./formAndElements"
+import { createAnElement, createAnImg, createForm } from "./formAndElements"
 import Logo from "./Assets/Logo.png"
 import HomeIcon from "./Assets/Home.svg"
 import TodayIcon from "./Assets/Today.svg"
@@ -39,11 +39,12 @@ const createProject = (projectName) =>{
     return projectDiv
 }
 /******************** HELPER FUNCTIONS *********************/
+const popUpForm = createForm("Add Task", "Add")
+const modal = createAnElement("div", "modal")
 
 const loadPage = () =>{
     //HEADER
     const pageContent = createAnElement("div", "pageContent")
-    const modal = createAnElement("div", "modal")
     pageContent.appendChild(modal)
 
     const headerDiv = createAnElement("div", "headerDiv")
@@ -97,12 +98,13 @@ const loadPage = () =>{
     pageContent.appendChild(headerDiv)
     pageContent.appendChild(sideBarDiv)
     pageContent.appendChild(loadMainBodyContent("Home"))
-    
+    pageContent.appendChild(popUpForm)
     return pageContent
 }
 
 const loadMainBodyContent=(option)=>{
-    //TO-DO LIST
+    //TO-DO LIST AREA
+    
     const toDoMainContent = createAnElement("div", "toDoMainContent")
     const tabTitleDiv = createAnElement("div", "tabTitleDiv")
     const tabIcon = createAnImg(HomeIcon, "tabIcon")
@@ -123,11 +125,19 @@ const loadMainBodyContent=(option)=>{
 
     if(option !== "Important" && option !== "Completed"){
         const addTaskBtn = createAnElement("button", "addTaskBtn")
+        addTaskBtn.addEventListener("click", ()=>{
+            popUpForm.style.display = "block"  //Have user fill out form and put the info into newList
+            modal.style.display = "block"
+        })
         taskDiv.appendChild(addTaskBtn)
     }   
     
+    const toDoListDiv = createAnElement("div", "toDoListDiv") //Container to hold tasks
+
     toDoMainContent.appendChild(tabTitleDiv)
     toDoMainContent.appendChild(taksAndToDoDIv)
+    toDoMainContent.appendChild(toDoListDiv) 
+
     return toDoMainContent
 }
 

@@ -10,15 +10,18 @@ const createAnImg = (importedImage, className) =>{
     return myImg
 }
 
-const createForm = ()=>{
+const createForm = (formTitle, submitBtnName)=>{
     const popUpForm = createAnElement("div", "popUpForm")
     
     //Top of form
     const formTitleDiv = createAnElement("div", "formTitleDiv")
     const formTItle = createAnElement("h2", "formTItle")
-    formTItle.textContent = "Add Task"
+    formTItle.textContent = formTitle
     const exitBtn = createAnElement("button", "exitBtn")
     exitBtn.textContent = "x"
+    exitBtn.addEventListener("click", ()=>{
+        closeForm()
+    })
     formTitleDiv.appendChild(formTItle)
     formTitleDiv.appendChild(exitBtn)
 
@@ -35,8 +38,12 @@ const createForm = ()=>{
     const formActionBtnsDiv = createAnElement("div", "formActionBtnsDiv")
     const cancelBtn = createAnElement("button", "cancelBtn")
     cancelBtn.textContent = "Cancel"
+    cancelBtn.addEventListener("click", ()=>{
+        closeForm()
+    })
     const submitBtn = createAnElement("button", "submitBtn")
-    submitBtn.textContent = "Add"
+    submitBtn.textContent = submitBtnName
+
     formActionBtnsDiv.appendChild(cancelBtn)
     formActionBtnsDiv.appendChild(submitBtn)
 
@@ -44,6 +51,15 @@ const createForm = ()=>{
     popUpForm.appendChild(formContainer)
     popUpForm.appendChild(formActionBtnsDiv)
     return popUpForm
+}
+const closeForm=() =>{
+    const popUpForm = document.querySelector(".popUpForm")
+    const modal = document.querySelector(".modal")
+    const formTag = document.querySelector('.form')
+    popUpForm.style.display = "none"
+    modal.style.display = "none"
+    formTag.reset()  //Clears the form
+    
 }
 const createFormField = (attributeName, inputAttributeType)=>{
     const formField = createAnElement("div", "formField")
@@ -108,5 +124,6 @@ export{
     createAnElement,
     createAnImg,
     createForm,
-    createInput
+    createInput,
+    closeForm
 }
