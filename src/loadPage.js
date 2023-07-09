@@ -95,17 +95,19 @@ const loadPage = () =>{
 
     sideBarDiv.appendChild(footer)
 
+    const toDoMainContent = createAnElement("div", "toDoMainContent")
+    toDoMainContent.appendChild(loadTaskHeaderSection("Home"))
+    const toDoListDiv = createAnElement("div", "toDoListDiv") //Container to hold tasks
+    toDoMainContent.appendChild(toDoListDiv) 
+
     pageContent.appendChild(headerDiv)
     pageContent.appendChild(sideBarDiv)
-    pageContent.appendChild(loadMainBodyContent("Home"))
+    pageContent.appendChild(toDoMainContent)
     pageContent.appendChild(popUpForm)
     return pageContent
 }
-
-const loadMainBodyContent=(option)=>{
-    //TO-DO LIST AREA
-    
-    const toDoMainContent = createAnElement("div", "toDoMainContent")
+const loadTaskHeaderSection = (option)=>{
+    const taskHeaderSection = createAnElement("div", "taskHeaderSection")
     const tabTitleDiv = createAnElement("div", "tabTitleDiv")
     const tabIcon = createAnImg(HomeIcon, "tabIcon")
     const tabTitle = createAnElement("h2", "tabTitle")
@@ -131,18 +133,13 @@ const loadMainBodyContent=(option)=>{
         })
         taskDiv.appendChild(addTaskBtn)
     }   
-    
-    const toDoListDiv = createAnElement("div", "toDoListDiv") //Container to hold tasks
+    taskHeaderSection.appendChild(tabTitleDiv)
+    taskHeaderSection.appendChild(taksAndToDoDIv)
+    return taskHeaderSection
 
-    toDoMainContent.appendChild(tabTitleDiv)
-    toDoMainContent.appendChild(taksAndToDoDIv)
-    toDoMainContent.appendChild(toDoListDiv) 
-
-    return toDoMainContent
 }
-
 
 export{
     loadPage,
-    loadMainBodyContent
+    loadTaskHeaderSection
 }

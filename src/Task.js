@@ -1,8 +1,17 @@
+import {parse, format} from "date-fns"
+
 class Task{
     constructor(title, description, dueDate, priority="Low", isComplete="Incomplete"){
         this.title = title
         this.description = description
-        this.dueDate = dueDate
+
+        //Change date format
+        if(dueDate !== ""){
+            this.dueDate = this.formatDueDate(dueDate)
+        }else{
+            this.dueDate = "No due date"
+        }
+        
         this.priority = priority
         this.isComplete = isComplete
     }
@@ -31,8 +40,8 @@ class Task{
     set setTaskDescr(description){
         return this.description = description
     }
-    set setTuedate(dueDate){
-        return this.dueDate = dueDate
+    set setDuedate(dueDate){
+        return this.dueDate = this.formatDueDate(dueDate)
     }
     set setTriorityLevel(priority){
         return this.priority = priority
@@ -40,8 +49,15 @@ class Task{
     set setCompletionState(isComplete){
         return this.isComplete = isComplete
     }
+
+    formatDueDate(dueDate){
+        const dateString = dueDate
+        const date = parse(dateString, "yyyy-MM-dd", new Date())  
+        let formatedDate = format(date, "MM-dd-yyyy")
+        return formatedDate
+    }
 }
 
 export{
-    Task
+    Task,
 }

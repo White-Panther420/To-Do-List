@@ -3,14 +3,14 @@ import {ToDoList} from "./List.js"
 import EditIcon from "./Assets/Edit.png"
 import DeleteIcon from "./Assets/Delete.png"
 import InfoIcon from "./Assets/Info.png"
-import { loadPage, loadMainBodyContent} from "./loadPage"
+import { loadPage, loadTaskHeaderSection} from "./loadPage"
 import { createAnElement, createAnImg, createInput, createForm, closeForm } from "./formAndElements"
+import {format, parse} from "date-fns"
 
 //Load the constant part of page (header, sidebar, and some of body)
 const content = document.querySelector("#content")
 const pageContent = loadPage()
 content.appendChild(pageContent)
-const popUpForm = document.querySelector('.popUpForm')
 const modal = document.querySelector('.modal')
 
 //Indicate we are on the home page
@@ -22,8 +22,6 @@ let toDoMainContent = document.querySelector(".toDoMainContent")
 let toDoListDiv = document.querySelector(".toDoListDiv") //Container to hold tasks
 
 const newList = new ToDoList()  //New array to store task objects
-
-
 
 //FORM HANDLING
 const formTag = document.querySelector(".form")
@@ -38,7 +36,7 @@ submitBtn.addEventListener("click", (e)=>{
     
         newList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
         let currentListIndex = newList.getListLength()-1
-        toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex)) //Create GUI for task
+        toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, newList)) //Create GUI for task
 
         closeForm()
         e.preventDefault();  //Prevents form from sending data to backend by default
@@ -49,14 +47,22 @@ submitBtn.addEventListener("click", (e)=>{
 const mainSidebarOptions = document.querySelectorAll(".optionDiv")
 mainSidebarOptions.forEach(option => {
     option.addEventListener("click", ()=>{
-        // pageContent.removeChild(toDoMainContent)
-        // toDoMainContent = loadMainBodyContent(option.textContent)
+        //Load correct task GUI based on user option
+        let taskHeaderSection = document.querySelector(".taskHeaderSection")
+        toDoMainContent.removeChild(taskHeaderSection)
+        taskHeaderSection = loadTaskHeaderSection(option.textContent)
+        toDoMainContent.insertBefore(taskHeaderSection, toDoListDiv)
         
-        // newList.sortTasks(option.textContent.toLowerCase())
-        // for(let i=0; i<newList.length; i++){
-        //     toDoListDiv.appendChild(GUI.displayTaskGUI(i))
-        // }
+        //Update array and GUI
+        toDoListDiv.textContent = ""
+        let sortedList = newList.sortTasks(option.textContent.toLowerCase())
+        console.log("SORTED LIST: " + sortedList)
+        console.log("NEW LIST: " + newList)
+        for(let i=0; i<sortedList.getListLength(); i++){
+            toDoListDiv.appendChild(GUI.displayTaskGUI(i, sortedList))
+        }
         
+        //Update tab title and icon
         pageContent.appendChild(toDoMainContent)
         let optionIcon = option.querySelector("img")
         let optionIconSrc = optionIcon.getAttribute("src")
@@ -74,10 +80,10 @@ mainSidebarOptions.forEach(option => {
 
 /******************** GUI FUNCTIONS *********************/
 const GUI = (()=>{
-    const createTaskGUI = (currentListIndex)=>{
+    const createTaskGUI = (currentListIndex, taskList)=>{ //Creates the GUI to display a tasj and its information
         const taskContainer = createAnElement("div", "taskContainer")
         taskContainer.setAttribute("data-state", currentListIndex)  //Link each GUI task to console task stored in newList
-        const currentTask = newList.searchTask(currentListIndex) 
+        const currentTask = taskList.searchTask(currentListIndex) 
     
         const leftTaskSideDiv = createAnElement("div", "leftTaskSideDiv")
         const completedCheckCircle = createInput("completed", "checkbox")
@@ -90,11 +96,7 @@ const GUI = (()=>{
     
         const rightTaskSideDiv = createAnElement("div", "rightTaskSideDiv")
         const dueDateP = createAnElement("p", "dueDateP")
-        if(currentTask.getDuedate === ""){
-            dueDateP.textContent = "No due date"
-        }else{
-            dueDateP.textContent = currentTask.getDuedate
-        }
+        dueDateP.textContent = currentTask.getDuedate
         rightTaskSideDiv.appendChild(dueDateP)
     
         const editIcon = createAnImg(EditIcon, "taskOptionIcon")
@@ -125,11 +127,11 @@ const GUI = (()=>{
         return taskContainer
     }
     
-    const displayTaskGUI = (currentListIndex)=>{
-        return createTaskGUI(currentListIndex)
+    const displayTaskGUI = (currentListIndex, taskList)=>{
+        return createTaskGUI(currentListIndex, taskList)
     }
 
-    const displayEditTaskGUI = (currentTaskIndex, currentTaskContainer)=>{
+    const displayEditTaskGUI = (currentTaskIndex, currentTaskContainer)=>{  //Displays the form to allow user to edit task
         const editForm = createForm("Edit Task", "Edit")
         editForm.setAttribute('id', "EditForm")
 
@@ -147,18 +149,14 @@ const GUI = (()=>{
             const taskTitle = document.getElementById("title").value
             const taskDescr = document.getElementById("description").value
             let taskDueDate = document.getElementById("due_date").value
-            if(taskDueDate === ""){
-                taskDueDate = "No due date"
-            }
             const taskPriority = document.getElementById("priority").value
-            console.log("CURRENT PRIORITY: " + currentTask.getPriorityLevel)
-            console.log("NEW PRIORITY: " + taskPriority)
+
             if(currentTask.getPriorityLevel !== taskPriority){
                 updatePriorityGUI(currentTaskContainer, currentTask.getPriorityLevel, taskPriority)
             }
             newList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
-            updateTaskGUI(currentTaskContainer, taskTitle, taskDueDate)
-            //newList.printTask()
+            updateTaskGUI(currentTaskContainer, taskTitle, taskDueDate)  //Update task GUI
+
             closeForm()
             currentTaskContainer.removeChild(editForm)
             e.preventDefault();
@@ -171,14 +169,18 @@ const GUI = (()=>{
         taskTitle.value = currentTask.getTaskName
         const taskDescr = document.getElementById("description")
         taskDescr.value = currentTask.getTaskDescr
+
+        //Reformat date so form can recognize the value
         const taskDueDate = document.getElementById("due_date")
-        taskDueDate.value = currentTask.getDuedate
+        const currentTaskDueDate = currentTask.getDuedate
+        taskDueDate.value = formatTaskDate(currentTaskDueDate, "MM-dd-yyyy", "yyyy-MM-dd")
+
         const taskPriority = document.getElementById("priority")
         taskPriority.value = currentTask.getPriorityLevel
         editForm.style.display = "block"
     }
 
-    const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{
+    const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{  //Displays GUI for user to see task overcview
         const infoContainer = createAnElement("div", "infoContainer")
         const infoTitleDiv = createAnElement("div", "infoTitleDiv")
         const infoTitle = createAnElement("h2", "infoTitle")
@@ -237,9 +239,8 @@ const GUI = (()=>{
         const taskTitle = taskContainer.querySelector(".taskNameP")
         taskTitle.textContent = newTaskTitle
         const taskDueDate = taskContainer.querySelector('.dueDateP')
-        taskDueDate.textContent = newTaskDueDate
+        taskDueDate.textContent = formatTaskDate(newTaskDueDate, "yyyy-MM-dd", "MM-dd-yyyy")
     }
-
     const updatePriorityGUI = (taskContainer, currentPriority, newPriority)=>{
         const checkCircle = taskContainer.querySelector(".complete")
         checkCircle.classList.remove(currentPriority.toLowerCase())
@@ -249,3 +250,22 @@ const GUI = (()=>{
 })()
 
 /******************** GUI FUNCTIONS *********************/
+
+/******************** HELPER FUNCTIONS *********************/
+const formatTaskDate = (dueDate, currentFormat, newFormat)=>{
+    if(dueDate === "No due date"){
+        return dueDate
+    }
+    const date = parse(dueDate, currentFormat, new Date()) 
+    const formattedDate = format(date, newFormat)
+    return formattedDate
+}
+
+newList.createNewTask("Task A", "dsadas", "2023-07-09", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
+newList.createNewTask("Task A", "dsadas", "2023-12-31", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
+newList.createNewTask("Task A", "dsadas", "2024-01-04", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
+newList.createNewTask("Task A", "dsadas", "2024-01-06", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
