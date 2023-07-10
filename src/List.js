@@ -41,54 +41,52 @@ class ToDoList{
         const currentTask = this.searchTask(taskContainerIndex)
         currentTask.getCompletionState === "Incomplete" ?  currentTask.setCompletionState="Complete" : currentTask.setCompletionState="Incomplete"
     }
-    sortTasks = (sortingOption)=>{
-        let listToBeSorted = [...this.list]  //Make a shallow copy
-        switch(sortingOption.toLowerCase()){
-            case "today":
-                listToBeSorted = listToBeSorted.filter((task)=>{
-                    const todayDate = format(new Date(),'MM-dd-yyyy');
-                    console.log("TODAY DATE: " + todayDate)
-                    console.log(task.getDuedate)
-                    if(task.getDuedate === todayDate){
-                        return true
-                    }
-                })
-                break;
-            case "week":
-                listToBeSorted = listToBeSorted.filter((task)=>{
-                    //Get current day in number
-                    const todayDate =  "12-30-2023"  //format(new Date(),'MM-dd-yyyy');
-                    const dateParts = todayDate.split('-')
-                    let day = parseInt(dateParts[1])
-                    let month = parseInt(dateParts[0])
-                    let year = parseInt(dateParts[2])
-                    //Get task due date day in number
-                    const taskDueDate = task.getDuedate
-                    const taskDateParts = taskDueDate.split('-')
-                    let taskDay = parseInt(taskDateParts[1])
-                    let taskMonth = parseInt(taskDateParts[0])
-                    let taskYear =parseInt(taskDateParts[2])
-                    if(taskDay >= day  && taskDay <= day+6){  //Week spans same month
-                        return true
-                    }
-                    else if(taskDay <= day && taskMonth === month+1){  //Week spans into next month
-                        if((day === 30 && taskDay <= 5 || day === 31 && taskDay <= 6) && taskYear === year){
-                            return true
-                        }
-                    }
-                    else if(taskDay <= day && taskYear === year+1){
-                        return true
-                    }
-                    else{
-                        return false
-                    }
-                })
-                break;
-            default:
-                break;
+    isDueToday(taskIndex){
+        const todayDate = format(new Date(),'MM-dd-yyyy');
+        const taskDueDate = this.searchTask(taskIndex).getDuedate
+        if(taskDueDate === todayDate){
+            return true
         }
-        console.log("THE SORTED LIST: " + listToBeSorted)
-        return listToBeSorted
+    }
+    isDueThisWeek(taskIndex){
+        //Get current day in number
+        const todayDate =  "12-30-2023"  //format(new Date(),'MM-dd-yyyy');
+        const dateParts = todayDate.split('-')
+        let day = parseInt(dateParts[1])
+        let month = parseInt(dateParts[0])
+        let year = parseInt(dateParts[2])
+        //Get task due date day in number
+        const taskDueDate = this.searchTask(taskIndex).getDuedate
+        const taskDateParts = taskDueDate.split('-')
+        let taskDay = parseInt(taskDateParts[1])
+        let taskMonth = parseInt(taskDateParts[0])
+        let taskYear =parseInt(taskDateParts[2])
+        if(taskDay >= day  && taskDay <= day+6){  //Week spans same month
+            return true
+        }
+        else if(taskDay <= day && taskMonth === month+1){  //Week spans into next month
+            if((day === 30 && taskDay <= 5 || day === 31 && taskDay <= 6) && taskYear === year){
+                return true
+            }
+        }
+        else if(taskDay <= day && taskYear === year+1){
+            return true
+        }
+        else{
+            return false
+        }
+    }
+    checkTaskImportance(taskIndex){
+        const taskPriority = this.searchTask(taskIndex).getPriorityLevel
+        if(taskPriority.toLowerCase() === "high"){
+            return true
+        }
+    }
+    checkTaskCompletionStatus(taskIndex){
+        const checkTaskCompletionStatus = this.searchTask(taskIndex).getCompletionState
+        if(checkTaskCompletionStatus.toLowerCase() === "complete"){
+            return true
+        }
     }
 }
 

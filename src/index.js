@@ -47,6 +47,7 @@ submitBtn.addEventListener("click", (e)=>{
 const mainSidebarOptions = document.querySelectorAll(".optionDiv")
 mainSidebarOptions.forEach(option => {
     option.addEventListener("click", ()=>{
+        const selecetedOption = option.textContent.toLocaleLowerCase()
         //Load correct task GUI based on user option
         let taskHeaderSection = document.querySelector(".taskHeaderSection")
         toDoMainContent.removeChild(taskHeaderSection)
@@ -55,11 +56,27 @@ mainSidebarOptions.forEach(option => {
         
         //Update array and GUI
         toDoListDiv.textContent = ""
-        let sortedList = newList.sortTasks(option.textContent.toLowerCase())
-        console.log("SORTED LIST: " + sortedList)
-        console.log("NEW LIST: " + newList)
-        for(let i=0; i<sortedList.getListLength(); i++){
-            toDoListDiv.appendChild(GUI.displayTaskGUI(i, sortedList))
+
+        for(let i=0; i<newList.getListLength(); i++){
+            console.log(newList.searchTask(i))
+            if(selecetedOption === "home"){
+                toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
+            }
+            else if(selecetedOption === "today" && newList.isDueToday(i)){
+                toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
+            }
+            else if(selecetedOption === "week" && newList.isDueThisWeek(i)){
+                toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
+            }
+            else if(selecetedOption === "important" && newList.checkTaskImportance(i)){
+                toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
+            }
+            else if(selecetedOption === "completed" && newList.checkTaskCompletionStatus(i)){
+                toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
+            }
+            else{
+                continue
+            }
         }
         
         //Update tab title and icon
@@ -89,6 +106,7 @@ const GUI = (()=>{
         const completedCheckCircle = createInput("completed", "checkbox")
         completedCheckCircle.classList.remove("input")
         completedCheckCircle.classList.add("complete", `${currentTask.getPriorityLevel.toLowerCase()}`)
+
         const taskNameP = createAnElement("p", "taskNameP")
         taskNameP.textContent = currentTask.getTaskName
         leftTaskSideDiv.appendChild(completedCheckCircle)
@@ -121,7 +139,9 @@ const GUI = (()=>{
             GUI.displayTaskStatus(completedCheckCircle, taskNameP)
             newList.updateTaskStatus(taskContainer.getAttribute("data-state"))
         })
-    
+        if(currentTask.getCompletionState === "Complete"){
+            completedCheckCircle.click()
+        }
         taskContainer.appendChild(leftTaskSideDiv)
         taskContainer.appendChild(rightTaskSideDiv)
         return taskContainer
@@ -134,6 +154,7 @@ const GUI = (()=>{
     const displayEditTaskGUI = (currentTaskIndex, currentTaskContainer)=>{  //Displays the form to allow user to edit task
         const editForm = createForm("Edit Task", "Edit")
         editForm.setAttribute('id', "EditForm")
+        console.log("CURRENT TASK: " + newList.searchTask(currentTaskIndex))
 
         //Specific eventListeners to delete forms when exited
         const exitBtn = editForm.querySelector(".exitBtn")
@@ -146,10 +167,10 @@ const GUI = (()=>{
         })
         const submitBtn = editForm.querySelector(".submitBtn")
         submitBtn.addEventListener("click", (e)=>{  //Giving each edit form their own event listeners
-            const taskTitle = document.getElementById("title").value
-            const taskDescr = document.getElementById("description").value
-            let taskDueDate = document.getElementById("due_date").value
-            const taskPriority = document.getElementById("priority").value
+            const taskTitle = editForm.querySelector("#title").value
+            const taskDescr = editForm.querySelector("#description").value
+            let taskDueDate = editForm.querySelector("#due_date").value
+            const taskPriority = editForm.querySelector("#priority").value
 
             if(currentTask.getPriorityLevel !== taskPriority){
                 updatePriorityGUI(currentTaskContainer, currentTask.getPriorityLevel, taskPriority)
@@ -165,17 +186,17 @@ const GUI = (()=>{
 
         //Give form current task values for user to edit
         let currentTask = newList.searchTask(currentTaskIndex)
-        const taskTitle = document.getElementById("title")
-        taskTitle.value = currentTask.getTaskName
-        const taskDescr = document.getElementById("description")
+        const taskTitle = editForm.querySelector("#title")
+        taskTitle.setAttribute("value", currentTask.getTaskName)
+        const taskDescr = editForm.querySelector("#description")
         taskDescr.value = currentTask.getTaskDescr
 
         //Reformat date so form can recognize the value
-        const taskDueDate = document.getElementById("due_date")
+        const taskDueDate = editForm.querySelector("#due_date")
         const currentTaskDueDate = currentTask.getDuedate
         taskDueDate.value = formatTaskDate(currentTaskDueDate, "MM-dd-yyyy", "yyyy-MM-dd")
 
-        const taskPriority = document.getElementById("priority")
+        const taskPriority = editForm.querySelector("#priority")
         taskPriority.value = currentTask.getPriorityLevel
         editForm.style.display = "block"
     }
@@ -263,9 +284,9 @@ const formatTaskDate = (dueDate, currentFormat, newFormat)=>{
 
 newList.createNewTask("Task A", "dsadas", "2023-07-09", "Low") 
 toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
-newList.createNewTask("Task A", "dsadas", "2023-12-31", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
-newList.createNewTask("Task A", "dsadas", "2024-01-04", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
-newList.createNewTask("Task A", "dsadas", "2024-01-06", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
+newList.createNewTask("Task B", "dsadas", "2023-12-31", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(1, newList)) //Create GUI for task
+newList.createNewTask("Task C", "dsadas", "2024-01-04", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(2, newList)) //Create GUI for task
+newList.createNewTask("Task D", "dsadas", "2024-01-06", "Low") 
+toDoListDiv.appendChild(GUI.displayTaskGUI(3, newList)) //Create GUI for task
