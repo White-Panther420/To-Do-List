@@ -126,7 +126,9 @@ const GUI = (()=>{
         })
         const deleteIcon = createAnImg(DeleteIcon, "taskOptionIcon")
         deleteIcon.addEventListener("click", ()=>{
-            
+            deleteTaskGUI(taskContainer)
+            newList.deleteTask(taskContainer.getAttribute("data-state"))
+            updateNumTasksGUI()
         })
         const infoIcon = createAnImg(InfoIcon, "taskOptionIcon")
         infoIcon.addEventListener("click", ()=>{
@@ -251,6 +253,16 @@ const GUI = (()=>{
     
         currentTaskContainer.appendChild(infoContainer)
         infoContainer.style.display = "block"
+    }
+    const deleteTaskGUI = (taskContainer)=>{
+        toDoListDiv.removeChild(taskContainer)
+        const tasks = document.querySelectorAll(".taskContainer")
+        let taskIndex = 0
+        //Reset attributes so they match with the array indixies
+        tasks.forEach(task => {
+            task.setAttribute("data-state", taskIndex)
+            taskIndex++
+        });
     }
     const displayTaskStatus = (checkButton, taskTitle)=>{
         if(checkButton.checked === true){  //Button currently not checked

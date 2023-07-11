@@ -22,7 +22,7 @@ class ToDoList{
         return this.list[taskIndex]
     }
     deleteTask(taskIndex){
-        if(index > -1){
+        if(taskIndex > -1){
             this.list.splice(taskIndex,1)
         }
     }
