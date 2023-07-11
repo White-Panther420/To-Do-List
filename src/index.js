@@ -66,6 +66,7 @@ mainSidebarOptions.forEach(option => {
                 toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
             }
             else if(selecetedOption === "week" && newList.isDueThisWeek(i)){
+                console.log(("COMPLETIION: " + newList.searchTask(i).getCompletionState))
                 toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
             }
             else if(selecetedOption === "important" && newList.checkTaskImportance(i)){
@@ -139,8 +140,11 @@ const GUI = (()=>{
             GUI.displayTaskStatus(completedCheckCircle, taskNameP)
             newList.updateTaskStatus(taskContainer.getAttribute("data-state"))
         })
+
+        //For check buttons created after the tab switches
         if(currentTask.getCompletionState === "Complete"){
-            completedCheckCircle.click()
+            completedCheckCircle.checked = true
+            GUI.displayTaskStatus(completedCheckCircle, taskNameP)
         }
         taskContainer.appendChild(leftTaskSideDiv)
         taskContainer.appendChild(rightTaskSideDiv)

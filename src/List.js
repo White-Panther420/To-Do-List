@@ -39,7 +39,12 @@ class ToDoList{
     }
     updateTaskStatus = (taskContainerIndex)=>{
         const currentTask = this.searchTask(taskContainerIndex)
-        currentTask.getCompletionState === "Incomplete" ?  currentTask.setCompletionState="Complete" : currentTask.setCompletionState="Incomplete"
+        if(currentTask.getCompletionState === "Incomplete"){
+            currentTask.setCompletionState="Complete"
+        }
+        else{
+            currentTask.setCompletionState="Incomplete"
+        }
     }
     isDueToday(taskIndex){
         const todayDate = format(new Date(),'MM-dd-yyyy');
