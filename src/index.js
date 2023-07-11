@@ -37,6 +37,7 @@ submitBtn.addEventListener("click", (e)=>{
         newList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
         let currentListIndex = newList.getListLength()-1
         toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, newList)) //Create GUI for task
+        GUI.updateNumTasksGUI()
 
         closeForm()
         e.preventDefault();  //Prevents form from sending data to backend by default
@@ -79,7 +80,7 @@ mainSidebarOptions.forEach(option => {
                 continue
             }
         }
-        
+        GUI.updateNumTasksGUI()
         //Update tab title and icon
         pageContent.appendChild(toDoMainContent)
         let optionIcon = option.querySelector("img")
@@ -141,11 +142,12 @@ const GUI = (()=>{
             newList.updateTaskStatus(taskContainer.getAttribute("data-state"))
         })
 
-        //For check buttons created after the tab switches
+        //For completed tasks that need to be displayed as completed when changing tabs
         if(currentTask.getCompletionState === "Complete"){
             completedCheckCircle.checked = true
             GUI.displayTaskStatus(completedCheckCircle, taskNameP)
         }
+
         taskContainer.appendChild(leftTaskSideDiv)
         taskContainer.appendChild(rightTaskSideDiv)
         return taskContainer
@@ -248,7 +250,6 @@ const GUI = (()=>{
         infoContainer.appendChild(infoActionDiv)
     
         currentTaskContainer.appendChild(infoContainer)
-        
         infoContainer.style.display = "block"
     }
     const displayTaskStatus = (checkButton, taskTitle)=>{
@@ -271,7 +272,12 @@ const GUI = (()=>{
         checkCircle.classList.remove(currentPriority.toLowerCase())
         checkCircle.classList.add(newPriority.toLowerCase())
     }
-    return{displayTaskGUI, displayTaskInformation, displayTaskStatus}
+    const updateNumTasksGUI = ()=>{
+        const tasks = document.querySelectorAll(".taskContainer")
+        const numTasksP = document.querySelector(".numTasks")
+        numTasksP.textContent = `(${tasks.length})`
+    }
+    return{displayTaskGUI, displayTaskInformation, displayTaskStatus, updateNumTasksGUI}
 })()
 
 /******************** GUI FUNCTIONS *********************/
@@ -294,3 +300,4 @@ newList.createNewTask("Task C", "dsadas", "2024-01-04", "Low")
 toDoListDiv.appendChild(GUI.displayTaskGUI(2, newList)) //Create GUI for task
 newList.createNewTask("Task D", "dsadas", "2024-01-06", "Low") 
 toDoListDiv.appendChild(GUI.displayTaskGUI(3, newList)) //Create GUI for task
+GUI.updateNumTasksGUI()
