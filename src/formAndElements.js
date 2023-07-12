@@ -52,6 +52,7 @@ const createForm = (formTitle, submitBtnName)=>{
     popUpForm.appendChild(formActionBtnsDiv)
     return popUpForm
 }
+
 const closeForm=() =>{
     const popUpForm = document.querySelector(".popUpForm")
     const modal = document.querySelector(".modal")
@@ -125,5 +126,6 @@ export{
     createAnImg,
     createForm,
     createInput,
+    createFormField,
     closeForm
 }

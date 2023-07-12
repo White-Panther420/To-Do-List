@@ -1,10 +1,12 @@
 import "./Styles/style.css"
 import {ToDoList} from "./List.js" 
+import { Project } from "./Projects"
 import EditIcon from "./Assets/Edit.png"
 import DeleteIcon from "./Assets/Delete.png"
 import InfoIcon from "./Assets/Info.png"
+import ProjectIcon from "./Assets/Project.png"
 import { loadPage, loadTaskHeaderSection} from "./loadPage"
-import { createAnElement, createAnImg, createInput, createForm, closeForm } from "./formAndElements"
+import { createAnElement, createAnImg, createInput, createForm, createFormField, closeForm } from "./formAndElements"
 import {format, parse} from "date-fns"
 
 //Load the constant part of page (header, sidebar, and some of body)
@@ -22,6 +24,7 @@ let toDoMainContent = document.querySelector(".toDoMainContent")
 let toDoListDiv = document.querySelector(".toDoListDiv") //Container to hold tasks
 
 const newList = new ToDoList()  //New array to store task objects
+const newProjectList = new Project() //New array to hold a list of projects, each containing a list of ToDoList objects
 
 //FORM HANDLING
 const submitBtn = document.querySelector(".submitBtn")
@@ -80,7 +83,7 @@ mainSidebarOptions.forEach(option => {
         GUI.updateNumTasksGUI()
 
         //Update tab title and icon
-        pageContent.appendChild(toDoMainContent)
+        //pageContent.appendChild(toDoMainContent)
         let optionIcon = option.querySelector("img")
         let optionIconSrc = optionIcon.getAttribute("src")
         const tabIcon = document.querySelector(".tabIcon")
@@ -94,6 +97,41 @@ mainSidebarOptions.forEach(option => {
         option.setAttribute("id", "selecetedOption")
     })
 });
+
+//PROJECT SECTION
+const addProjectBtn = document.querySelector(".addProjectBtn")
+addProjectBtn.addEventListener("click", ()=>{
+    modal.style.display = "block"
+    projectGUI.displayAddProjectGUI()
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /******************** GUI FUNCTIONS *********************/
 const GUI = (()=>{
@@ -350,6 +388,82 @@ const GUI = (()=>{
 
 /******************** GUI FUNCTIONS *********************/
 
+/******************** PROJECT GUI FUNCTIONS *********************/
+
+const projectGUI = (()=>{
+    const displayAddProjectGUI = ()=>{
+        const projectsContainer = document.querySelector(".projectsContainer")
+        const addProjectFrom = createAnElement("div", "popUpForm")
+        addProjectFrom.setAttribute("id", "addProjectFrom")
+
+        //Top of form
+        const projectitleDiv = createAnElement("div", "formTitleDiv")
+        const formTItle = createAnElement("h2", "formTItle")
+        formTItle.textContent = "Add A Project"
+        const exitBtn = createAnElement("button", "exitBtn")
+        exitBtn.textContent = "x"
+        exitBtn.addEventListener("click", ()=>{
+            content.removeChild(addProjectFrom)
+            modal.style.display = "none"
+        })
+        projectitleDiv.appendChild(formTItle)
+        projectitleDiv.appendChild(exitBtn)
+
+        const formContainer = createAnElement("div", "formContainer")
+        const newProjectForm = createAnElement("form", "form")
+        const projectTitleSection = createFormField("Title", "text")
+        newProjectForm.appendChild(projectTitleSection)
+        formContainer.appendChild(newProjectForm)
+
+        const formActionBtnsDiv = createAnElement("div", "formActionBtnsDiv")
+        const cancelBtn = createAnElement("button", "cancelBtn")
+        cancelBtn.textContent = "Cancel"
+        cancelBtn.addEventListener("click", ()=>{
+            content.removeChild(addProjectFrom)
+            modal.style.display = "none"
+        })
+        const submitBtn = createAnElement("button", "submitBtn")
+        submitBtn.textContent = "Add"
+        submitBtn.addEventListener('click', ()=>{
+            const projectTitle = formContainer.querySelector("#title").value
+            projectsContainer.appendChild(createProject(projectTitle))
+            //newProjectList.addProject()
+            closeForm()
+            content.removeChild(addProjectFrom)
+        })
+        formActionBtnsDiv.appendChild(cancelBtn)
+        formActionBtnsDiv.appendChild(submitBtn)
+
+        addProjectFrom.appendChild(projectitleDiv)
+        addProjectFrom.appendChild(formContainer)
+        addProjectFrom.appendChild(formActionBtnsDiv)
+        content.appendChild(addProjectFrom)
+        addProjectFrom.style.display = "block"
+    }
+    const createProject = (projectName) =>{
+        const projectDiv = createAnElement("div", "projectDiv")
+        const leftSideDiv = createAnElement("div", "leftSideDiv")
+        const projectIcon = createAnImg(ProjectIcon, "projectIconLeft")
+        const projectNameP = createAnElement("p", "projectNameP")
+        projectNameP.textContent = projectName
+        leftSideDiv.appendChild(projectIcon)
+        leftSideDiv.appendChild(projectNameP)
+        
+        const rightSideDiv = createAnElement("div", "rightSideDiv")
+        const editIcon = createAnImg(EditIcon, "projectIcon")
+        const deleteIcon = createAnImg(DeleteIcon, "projectIcon")
+        rightSideDiv.appendChild(editIcon)
+        rightSideDiv.appendChild(deleteIcon)
+    
+        projectDiv.appendChild(leftSideDiv)
+        projectDiv.appendChild(rightSideDiv)
+        return projectDiv
+    }
+
+    return{displayAddProjectGUI}
+})()
+
+
 /******************** HELPER FUNCTIONS *********************/
 const formatTaskDate = (dueDate, currentFormat, newFormat)=>{
     if(dueDate === "No due date"){
@@ -359,13 +473,35 @@ const formatTaskDate = (dueDate, currentFormat, newFormat)=>{
     const formattedDate = format(date, newFormat)
     return formattedDate
 }
+const swtichTaskHeaderContent = (option)=>{
+    let taskHeaderSection = document.querySelector(".taskHeaderSection")
+    toDoMainContent.removeChild(taskHeaderSection)
+    taskHeaderSection = loadTaskHeaderSection(option)
+    toDoMainContent.insertBefore(taskHeaderSection, toDoListDiv)
+    
+    toDoListDiv.textContent = ""
 
-newList.createNewTask("Task A", "dsadas", "2023-07-09", "Low") 
+    //Update tab title and icon
+    pageContent.appendChild(toDoMainContent)
+    let optionIcon = option.querySelector("img")
+    let optionIconSrc = optionIcon.getAttribute("src")
+    const tabIcon = document.querySelector(".tabIcon")
+    tabIcon.setAttribute("src", optionIconSrc)
+    const tabTitle = document.querySelector(".tabTitle")
+    tabTitle.textContent = option.textContent
+
+    mainSidebarOptions.forEach(option =>{
+        option.removeAttribute("id")
+    })
+    option.setAttribute("id", "selecetedOption")
+}
+
+newList.createNewTask("Task A", "dsadas", "2023-07-12", "Low") 
 toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
-newList.createNewTask("Task B", "dsadas", "2023-12-31", "Low") 
+newList.createNewTask("Task B", "dsadas", "2023-07-14", "Low") 
 toDoListDiv.appendChild(GUI.displayTaskGUI(1, newList)) //Create GUI for task
-newList.createNewTask("Task C", "dsadas", "2024-01-04", "Low") 
+newList.createNewTask("Task C", "dsadas", "2023-07-15", "Low") 
 toDoListDiv.appendChild(GUI.displayTaskGUI(2, newList)) //Create GUI for task
-newList.createNewTask("Task D", "dsadas", "2024-01-06", "Low") 
+newList.createNewTask("Task D", "dsadas", "2023-07-16", "Low") 
 toDoListDiv.appendChild(GUI.displayTaskGUI(3, newList)) //Create GUI for task
 GUI.updateNumTasksGUI()

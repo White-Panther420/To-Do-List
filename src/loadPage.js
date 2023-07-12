@@ -78,9 +78,9 @@ const loadPage = () =>{
     projectOptionDiv.appendChild(projectHeaderDiv)
     projectOptionDiv.appendChild(projectsContainer)
     const projectNames = ["Psssssssroject1", "Project2", "Project3"]
-    for(let i=0; i<projectNames.length; i++){
-        projectOptionDiv.appendChild(createProject(projectNames[i]))
-    }
+    // for(let i=0; i<projectNames.length; i++){
+    //     projectOptionDiv.appendChild(createProject(projectNames[i]))
+    // }
 
     sideBarDiv.appendChild(projectOptionDiv)
 

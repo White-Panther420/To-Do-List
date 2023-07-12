@@ -1,5 +1,5 @@
 import { Task } from "./Task";
-import {parse, format, getDay} from "date-fns"
+import {parse, format, getDay, startOfWeek, endOfWeek, isWithinInterval} from "date-fns"
 class ToDoList{
     constructor(){
         this.list = []
@@ -49,31 +49,12 @@ class ToDoList{
         }
     }
     isDueThisWeek(taskIndex){
-        //Get current day in number
-        const todayDate = format(new Date(),'MM-dd-yyyy');
-        const dateParts = todayDate.split('-')
-        let day = parseInt(dateParts[1])
-        let month = parseInt(dateParts[0])
-        let year = parseInt(dateParts[2])
-        //Get task due date day in number
-        const taskDueDate = this.searchTask(taskIndex).getDuedate
-        const taskDateParts = taskDueDate.split('-')
-        let taskDay = parseInt(taskDateParts[1])
-        let taskMonth = parseInt(taskDateParts[0])
-        let taskYear =parseInt(taskDateParts[2])
-        if(taskDay >= day  && taskDay <= day+6){  //Week spans same month
+        const taskDueDate = parse(this.searchTask(taskIndex).getDuedate, "MM-dd-yyyy", new Date())
+        const startOfCurrentWeek = startOfWeek(new Date())
+        const endOfCurrentWeek = endOfWeek(new Date())
+        const isWithinCurrentWeek = isWithinInterval(taskDueDate, { start: startOfCurrentWeek, end: endOfCurrentWeek });
+        if(isWithinCurrentWeek){
             return true
-        }
-        else if(taskDay <= day && taskMonth === month+1){  //Week spans into next month
-            if((day === 30 && taskDay <= 5 || day === 31 && taskDay <= 6) && taskYear === year){
-                return true
-            }
-        }
-        else if(taskDay <= day && taskYear === year+1){
-            return true
-        }
-        else{
-            return false
         }
     }
     checkTaskImportance(taskIndex){
