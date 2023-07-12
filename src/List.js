@@ -7,11 +7,6 @@ class ToDoList{
     addTask(task){
         this.list.push(task)
     }
-    printTask(){
-        this.list.forEach(task => {
-            console.log("Task Name: " + task.getTaskName)
-        });
-    }
     getListLength(){
         return this.list.length
     }
@@ -55,7 +50,7 @@ class ToDoList{
     }
     isDueThisWeek(taskIndex){
         //Get current day in number
-        const todayDate =  "12-30-2023"  //format(new Date(),'MM-dd-yyyy');
+        const todayDate = format(new Date(),'MM-dd-yyyy');
         const dateParts = todayDate.split('-')
         let day = parseInt(dateParts[1])
         let month = parseInt(dateParts[0])

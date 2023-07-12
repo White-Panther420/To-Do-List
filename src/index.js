@@ -24,8 +24,6 @@ let toDoListDiv = document.querySelector(".toDoListDiv") //Container to hold tas
 const newList = new ToDoList()  //New array to store task objects
 
 //FORM HANDLING
-const formTag = document.querySelector(".form")
-
 const submitBtn = document.querySelector(".submitBtn")
 submitBtn.addEventListener("click", (e)=>{
     if(submitBtn.textContent = "Add"){
@@ -37,7 +35,7 @@ submitBtn.addEventListener("click", (e)=>{
         newList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in general todo list
         let currentListIndex = newList.getListLength()-1
         toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, newList)) //Create GUI for task
-        GUI.updateNumTasksGUI()
+        GUI.updateNumTasksGUI() 
 
         closeForm()
         e.preventDefault();  //Prevents form from sending data to backend by default
@@ -67,7 +65,6 @@ mainSidebarOptions.forEach(option => {
                 toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
             }
             else if(selecetedOption === "week" && newList.isDueThisWeek(i)){
-                console.log(("COMPLETIION: " + newList.searchTask(i).getCompletionState))
                 toDoListDiv.appendChild(GUI.displayTaskGUI(i, newList))
             }
             else if(selecetedOption === "important" && newList.checkTaskImportance(i)){
@@ -81,6 +78,7 @@ mainSidebarOptions.forEach(option => {
             }
         }
         GUI.updateNumTasksGUI()
+
         //Update tab title and icon
         pageContent.appendChild(toDoMainContent)
         let optionIcon = option.querySelector("img")
@@ -126,9 +124,8 @@ const GUI = (()=>{
         })
         const deleteIcon = createAnImg(DeleteIcon, "taskOptionIcon")
         deleteIcon.addEventListener("click", ()=>{
-            deleteTaskGUI(taskContainer)
-            newList.deleteTask(taskContainer.getAttribute("data-state"))
-            updateNumTasksGUI()
+            modal.style.display = "block"
+            createDeleteGUI(currentTask.getTaskName, taskContainer)
         })
         const infoIcon = createAnImg(InfoIcon, "taskOptionIcon")
         infoIcon.addEventListener("click", ()=>{
@@ -162,7 +159,6 @@ const GUI = (()=>{
     const displayEditTaskGUI = (currentTaskIndex, currentTaskContainer)=>{  //Displays the form to allow user to edit task
         const editForm = createForm("Edit Task", "Edit")
         editForm.setAttribute('id', "EditForm")
-        console.log("CURRENT TASK: " + newList.searchTask(currentTaskIndex))
 
         //Specific eventListeners to delete forms when exited
         const exitBtn = editForm.querySelector(".exitBtn")
@@ -180,7 +176,7 @@ const GUI = (()=>{
             let taskDueDate = editForm.querySelector("#due_date").value
             const taskPriority = editForm.querySelector("#priority").value
 
-            if(currentTask.getPriorityLevel !== taskPriority){
+            if(currentTask.getPriorityLevel !== taskPriority){  //Prevent duplicate classes on element
                 updatePriorityGUI(currentTaskContainer, currentTask.getPriorityLevel, taskPriority)
             }
             newList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
@@ -208,7 +204,67 @@ const GUI = (()=>{
         taskPriority.value = currentTask.getPriorityLevel
         editForm.style.display = "block"
     }
+    const createDeleteGUI = (taskName, taskContainer)=>{
+        const deleteGUI = createAnElement("div", "popUpForm")
+        deleteGUI.setAttribute("id", "deleteGUI")
 
+        //Top of form
+        const deleteTitleDiv = createAnElement("div", "formTitleDiv")
+        deleteTitleDiv.style.background = "rgb(243, 39, 39)"
+        const formTItle = createAnElement("h2", "formTItle")
+        formTItle.textContent = "Delete Task"
+        const exitBtn = createAnElement("button", "exitBtn")
+        exitBtn.textContent = "x"
+        exitBtn.addEventListener("click", ()=>{
+            taskContainer.removeChild(deleteGUI)
+            modal.style.display = "none"
+        })
+        deleteTitleDiv.appendChild(formTItle)
+        deleteTitleDiv.appendChild(exitBtn)
+    
+        //Form body
+        const deleteWarningDiv = createAnElement("div", "deleteWarningDiv")
+        const deleteQuestionP = createAnElement("p", "deleteQuestionP")
+        deleteQuestionP.textContent = "Are you sure?"
+        const deleteWarningMsgDiv = createAnElement("div", "deleteWarningMsgDiv")
+        const deleteWarningMsgP1 = createAnElement("p", "deleteWarningMsgP1")
+        deleteWarningMsgP1.textContent = "Task"
+        const taskNameP = createAnElement("p", "taskNameSpan")
+        taskNameP.textContent = taskName 
+        const deleteWarningMsgP2 = createAnElement("p", "deleteWarningMsgP2")
+        deleteWarningMsgP2.textContent = "will be gone forever!"
+        deleteWarningMsgDiv.appendChild(deleteWarningMsgP1)
+        deleteWarningMsgDiv.appendChild(taskNameP)
+        deleteWarningMsgDiv.appendChild(deleteWarningMsgP2)
+
+        deleteWarningDiv.appendChild(deleteQuestionP)
+        deleteWarningDiv.appendChild(deleteWarningMsgDiv)
+        //Form options
+        const formActionBtnsDiv = createAnElement("div", "formActionBtnsDiv")
+        const cancelBtn = createAnElement("button", "cancelBtn")
+        cancelBtn.textContent = "Cancel"
+        cancelBtn.addEventListener("click", ()=>{
+            taskContainer.removeChild(deleteGUI)
+            modal.style.display = "none"
+        })
+        const submitBtn = createAnElement("button", "submitBtn")
+        submitBtn.textContent = "Delete"
+        submitBtn.addEventListener('click', ()=>{
+            deleteTaskGUI(taskContainer)
+            newList.deleteTask(taskContainer.getAttribute("data-state"))
+            updateNumTasksGUI()
+            taskContainer.removeChild(deleteGUI)
+            modal.style.display = "none"
+        })
+        formActionBtnsDiv.appendChild(cancelBtn)
+        formActionBtnsDiv.appendChild(submitBtn)
+
+        deleteGUI.appendChild(deleteTitleDiv)
+        deleteGUI.appendChild(deleteWarningDiv)
+        deleteGUI.appendChild(formActionBtnsDiv)
+        taskContainer.appendChild(deleteGUI)
+        deleteGUI.style.display = "block"
+    }
     const displayTaskInformation = (currentTaskIndex, currentTaskContainer)=>{  //Displays GUI for user to see task overcview
         const infoContainer = createAnElement("div", "infoContainer")
         const infoTitleDiv = createAnElement("div", "infoTitleDiv")
