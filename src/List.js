@@ -7,6 +7,11 @@ class ToDoList{
     addTask(task){
         this.list.push(task)
     }
+    printTasks(){
+        this.list.forEach(task => {
+            console.log(task)
+        });
+    }
     getListLength(){
         return this.list.length
     }

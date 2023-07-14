@@ -93,6 +93,10 @@ body{
     background-color: rgb(0, 170, 255);
 }
 
+#unselectedOption{
+    background-color: white;
+}
+
 .optionDiv,
 .projectDiv{
     display: flex;
@@ -167,8 +171,6 @@ body{
 }
 
 .projectDiv{
-    display: flex;
-    justify-content: start;
     padding: 12px 20px;
 }
 

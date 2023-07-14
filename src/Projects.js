@@ -4,6 +4,7 @@ class Project{
     constructor(){
         this.projectList = []
     }
+
     addProject(toDoList){
         this.projectList.push(toDoList)
     }
@@ -13,9 +14,9 @@ class Project{
         });
     }
     printProjectTasks(){
-        for(let key in obj){
-            console.log("ALL TASKS: " + this.projectList[key])
-        }
+        this.projectList.forEach(project => {
+            console.log("THE TASK INFO: " + project.printTasks())
+        });
     }
     printSpecificProjectTask(projectName){
         for(let projectName in this.projectList){
@@ -29,6 +30,9 @@ class Project{
     }
     searchForProject(projectIndex){
         return this.projectList[projectIndex]
+    }
+    getProjectListLength(){
+        return this.projectList.length
     }
 }
 

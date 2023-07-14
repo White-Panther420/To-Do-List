@@ -6,37 +6,17 @@ import TodayIcon from "./Assets/Today.svg"
 import WeekIcon from "./Assets/Week.svg"
 import ImportantIcon from "./Assets/Important.svg"
 import CompleteIcon from "./Assets/Complete.svg"
-import ProjectIcon from "./Assets/Project.png"
-import EditIcon from "./Assets/Edit.png"
-import DeleteIcon from "./Assets/Delete.png"
+
 /******************** HELPER FUNCTIONS *********************/
 const createSideBarOption = (importedIconName, optionName) =>{
     const optionDiv = createAnElement("div", "optionDiv")
+    optionDiv.setAttribute("id", "unselectedOption")
     const optionIcon = createAnImg(importedIconName, "optionIcon")
     optionDiv.appendChild(optionIcon)
     const optionText = createAnElement("p", "optionText")
     optionText.textContent = optionName
     optionDiv.appendChild(optionText)
     return optionDiv
-}
-const createProject = (projectName) =>{
-    const projectDiv = createAnElement("div", "projectDiv")
-    const leftSideDiv = createAnElement("div", "leftSideDiv")
-    const projectIcon = createAnImg(ProjectIcon, "projectIconLeft")
-    const projectNameP = createAnElement("p", "projectNameP")
-    projectNameP.textContent = projectName
-    leftSideDiv.appendChild(projectIcon)
-    leftSideDiv.appendChild(projectNameP)
-    
-    const rightSideDiv = createAnElement("div", "rightSideDiv")
-    const editIcon = createAnImg(EditIcon, "projectIcon")
-    const deleteIcon = createAnImg(DeleteIcon, "projectIcon")
-    rightSideDiv.appendChild(editIcon)
-    rightSideDiv.appendChild(deleteIcon)
-
-    projectDiv.appendChild(leftSideDiv)
-    projectDiv.appendChild(rightSideDiv)
-    return projectDiv
 }
 /******************** HELPER FUNCTIONS *********************/
 const popUpForm = createForm("Add Task", "Add")
@@ -74,6 +54,7 @@ const loadPage = () =>{
     projectHeader.appendChild(numProjeccts)
     const addProjectBtn = createAnElement("button", "addProjectBtn")
     projectHeaderDiv.appendChild(addProjectBtn)
+
     const projectsContainer = createAnElement("div", "projectsContainer")
     projectOptionDiv.appendChild(projectHeaderDiv)
     projectOptionDiv.appendChild(projectsContainer)
