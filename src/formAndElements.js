@@ -14,16 +14,7 @@ const createForm = (formTitle, submitBtnName)=>{
     const popUpForm = createAnElement("div", "popUpForm")
     
     //Top of form
-    const formTitleDiv = createAnElement("div", "formTitleDiv")
-    const formTItle = createAnElement("h2", "formTItle")
-    formTItle.textContent = formTitle
-    const exitBtn = createAnElement("button", "exitBtn")
-    exitBtn.textContent = "x"
-    exitBtn.addEventListener("click", ()=>{
-        closeForm()
-    })
-    formTitleDiv.appendChild(formTItle)
-    formTitleDiv.appendChild(exitBtn)
+    const formTitleDiv = createFormTitleSection(formTitle)
 
     //Actual form 
     const formContainer = createAnElement("div", "formContainer")
@@ -35,24 +26,43 @@ const createForm = (formTitle, submitBtnName)=>{
     form.appendChild(createFormField("Due_Date", "Date"))
     form.appendChild(createPriorityField("Priority"))  //Needs to be made differently
     
-    const formActionBtnsDiv = createAnElement("div", "formActionBtnsDiv")
-    const cancelBtn = createAnElement("button", "cancelBtn")
-    cancelBtn.textContent = "Cancel"
+    const formActionBtnsDiv = createFormActionSection(submitBtnName)
+    const exitBtn = formTitleDiv.querySelector(".exitBtn")
+    exitBtn.addEventListener("click", ()=>{
+        closeForm()
+    })
+    const cancelBtn = formActionBtnsDiv.querySelector(".cancelBtn")
     cancelBtn.addEventListener("click", ()=>{
         closeForm()
     })
-    const submitBtn = createAnElement("button", "submitBtn")
-    submitBtn.textContent = submitBtnName
-
-    formActionBtnsDiv.appendChild(cancelBtn)
-    formActionBtnsDiv.appendChild(submitBtn)
-
     popUpForm.appendChild(formTitleDiv)
     popUpForm.appendChild(formContainer)
     popUpForm.appendChild(formActionBtnsDiv)
     return popUpForm
 }
+const createFormTitleSection = (titleName)=>{
+    const formTitleDiv = createAnElement("div", "formTitleDiv")
+    const formTItle = createAnElement("h2", "formTItle")
+    formTItle.textContent = titleName
+    const exitBtn = createAnElement("button", "exitBtn")
+    exitBtn.textContent = "x"
 
+    formTitleDiv.appendChild(formTItle)
+    formTitleDiv.appendChild(exitBtn)
+    return formTitleDiv
+}
+const createFormActionSection = (submitBtnName)=>{
+    const formActionBtnsDiv = createAnElement("div", "formActionBtnsDiv")
+    const cancelBtn = createAnElement("button", "cancelBtn")
+    cancelBtn.textContent = "Cancel"
+
+    const submitBtn = createAnElement("button", "submitBtn")
+    submitBtn.textContent = submitBtnName
+
+    formActionBtnsDiv.appendChild(cancelBtn)
+    formActionBtnsDiv.appendChild(submitBtn)
+    return formActionBtnsDiv
+}
 const closeForm=() =>{
     const popUpForm = document.querySelector(".popUpForm")
     const modal = document.querySelector(".modal")
@@ -127,5 +137,7 @@ export{
     createForm,
     createInput,
     createFormField,
-    closeForm
+    closeForm,
+    createFormActionSection,
+    createFormTitleSection
 }
