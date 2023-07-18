@@ -26,6 +26,7 @@ const createForm = (formTitle, submitBtnName)=>{
     form.appendChild(createFormField("Due_Date", "Date"))
     form.appendChild(createPriorityField("Priority"))  //Needs to be made differently
     
+    //Bottom of form
     const formActionBtnsDiv = createFormActionSection(submitBtnName)
     const exitBtn = formTitleDiv.querySelector(".exitBtn")
     exitBtn.addEventListener("click", ()=>{
@@ -40,6 +41,49 @@ const createForm = (formTitle, submitBtnName)=>{
     popUpForm.appendChild(formActionBtnsDiv)
     return popUpForm
 }
+const createProjectForm = (formTitle, submitBtnName)=>{
+    const addProjectFrom = createAnElement("div", "popUpForm")
+    addProjectFrom.setAttribute("id", "addProjectFrom")
+
+    //Top of form
+    const projectitleDiv = createFormTitleSection(formTitle)
+
+    //Actual form
+    const formContainer = createAnElement("div", "formContainer")
+    const newProjectForm = createAnElement("form", "form")
+    const projectTitleSection = createFormField("Title", "text")
+    newProjectForm.appendChild(projectTitleSection)
+    formContainer.appendChild(newProjectForm)
+    
+    //Bottom of form
+    const formActionBtnsDiv = createFormActionSection(submitBtnName)
+    
+    addProjectFrom.appendChild(projectitleDiv)
+    addProjectFrom.appendChild(formContainer)
+    addProjectFrom.appendChild(formActionBtnsDiv)
+    return addProjectFrom    
+}
+const createDeleteWarninMsg = (deleteType, deleteTypeName)=>{
+    const deleteWarningDiv = createAnElement("div", "deleteWarningDiv")
+    const deleteQuestionP = createAnElement("p", "deleteQuestionP")
+    deleteQuestionP.textContent = "Are you sure?"
+    const deleteWarningMsgDiv = createAnElement("div", "deleteWarningMsgDiv")
+    const deleteWarningMsgP1 = createAnElement("p", "deleteWarningMsgP1")
+    deleteWarningMsgP1.textContent = deleteType
+    const taskNameP = createAnElement("p", "taskNameSpan")
+    taskNameP.textContent = deleteTypeName 
+    const deleteWarningMsgP2 = createAnElement("p", "deleteWarningMsgP2")
+    deleteWarningMsgP2.textContent = "will be gone forever!"
+    deleteWarningMsgDiv.appendChild(deleteWarningMsgP1)
+    deleteWarningMsgDiv.appendChild(taskNameP)
+    deleteWarningMsgDiv.appendChild(deleteWarningMsgP2)
+
+    deleteWarningDiv.appendChild(deleteQuestionP)
+    deleteWarningDiv.appendChild(deleteWarningMsgDiv)
+    return deleteWarningDiv
+}
+ 
+
 const createFormTitleSection = (titleName)=>{
     const formTitleDiv = createAnElement("div", "formTitleDiv")
     const formTItle = createAnElement("h2", "formTItle")
@@ -135,9 +179,10 @@ export{
     createAnElement,
     createAnImg,
     createForm,
+    createDeleteWarninMsg,
     createInput,
-    createFormField,
     closeForm,
     createFormActionSection,
-    createFormTitleSection
+    createFormTitleSection,
+    createProjectForm
 }

@@ -1,9 +1,18 @@
 import { Task } from "./Task";
-import {parse, format, getDay, startOfWeek, endOfWeek, isWithinInterval} from "date-fns"
+import {parse, format, startOfWeek, endOfWeek, isWithinInterval} from "date-fns"
 class ToDoList{
-    constructor(){
+    constructor(listTitle){
         this.list = []
+        this.listTitle = listTitle  //Give each list a unique identifier to help delete correct task from a project
     }
+
+    get getToDoListTitle(){
+        return this.listTitle
+    }
+    set setToDoListTItle(listTitle){
+        return this.listTitle = listTitle
+    }
+
     addTask(task){
         this.list.push(task)
     }
@@ -15,9 +24,6 @@ class ToDoList{
     getListLength(){
         return this.list.length
     }
-    getLastTask(){
-        return this.list[this.list.length-1]
-    }
     searchTask(taskIndex){
         return this.list[taskIndex]
     }
@@ -26,8 +32,9 @@ class ToDoList{
             this.list.splice(taskIndex,1)
         }
     }
-    createNewTask = (taskTitle, taskDescr, taskDueDate, taskPriority)=>{
-        let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "Incomplete")
+    createNewTask = (taskTitle, taskDescr, taskDueDate, taskPriority, taskSource)=>{
+        const taskIndex = this.getListLength()  //Will help us when deleting project-based tasks
+        let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "Incomplete", taskIndex, taskSource)
         this.addTask(newTask)
     }   
     updateTaskInfo = (taskTitle, taskDescr, taskDueDate, taskPriority, taskIndex)=>{
@@ -45,6 +52,14 @@ class ToDoList{
         else{
             currentTask.setCompletionState="Incomplete"
         }
+    }
+    updateTaskIdnicies = ()=>{
+        //Update indicies to continue matching them correctly to their list
+        let newTaskIndex = 0
+        this.list.forEach(task => {
+            task.setTaskIndex = newTaskIndex
+            newTaskIndex++
+        });
     }
     isDueToday(taskIndex){
         const todayDate = format(new Date(),'MM-dd-yyyy');

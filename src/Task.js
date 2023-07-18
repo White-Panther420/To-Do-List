@@ -1,7 +1,7 @@
 import {parse, format} from "date-fns"
 
 class Task{
-    constructor(title, description, dueDate, priority="Low", isComplete="Incomplete"){
+    constructor(title, description, dueDate, priority="Low", isComplete="Incomplete", taskIndex, taskSource ="general"){
         this.title = title
         this.description = description
 
@@ -14,6 +14,10 @@ class Task{
         
         this.priority = priority
         this.isComplete = isComplete
+        //Additional attribute to help tie tasks to their respective lists when deleting tasks
+        this.taskIndex = taskIndex 
+        //Additional attribute to help differentiate project tasks from general tasks when deleting tasks from upper tabs
+        this.taskSource = taskSource
     }
 
     //Getters
@@ -32,6 +36,12 @@ class Task{
     get getCompletionState(){
         return this.isComplete
     }
+    get getTaskIndex(){
+        return this.taskIndex
+    }
+    get getTaskSource(){
+        return this.taskSource
+    }
 
     //Setters
     set setTaskName(title){
@@ -48,6 +58,12 @@ class Task{
     }
     set setCompletionState(isComplete){
         return this.isComplete = isComplete
+    }
+    set setTaskIndex(taskIndex){
+        return this.taskIndex = taskIndex
+    }
+    set setTaskSource(taskSource){
+        return this.taskSource = taskSource
     }
 
     formatDueDate(dueDate){

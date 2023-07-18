@@ -6,7 +6,7 @@ import DeleteIcon from "./Assets/Delete.png"
 import InfoIcon from "./Assets/Info.png"
 import ProjectIcon from "./Assets/Project.png"
 import { loadPage, loadTaskHeaderSection} from "./loadPage"
-import { createAnElement, createAnImg, createInput, createForm, createFormField, closeForm, createFormActionSection, createFormTitleSection } from "./formAndElements"
+import { createAnElement, createAnImg, createInput, createForm, closeForm, createFormActionSection, createFormTitleSection, createProjectForm, createDeleteWarninMsg} from "./formAndElements"
 import {format, parse} from "date-fns"
 
 //Load the constant part of page (header, sidebar, and some of body)
@@ -18,6 +18,7 @@ const modal = document.querySelector('.modal')
 /******************** GUI FUNCTIONS *********************/
 const GUI = (()=>{
     const createTaskGUI = (currentListIndex, taskList)=>{ //Creates the GUI to display a tasj and its information
+        console.log("CURRENT LIST INDEX: " + currentListIndex)
         const taskContainer = createAnElement("div", "taskContainer")
         taskContainer.setAttribute("data-state", currentListIndex)  //Link each GUI task to console task stored in newList
         const currentTask = taskList.searchTask(currentListIndex) 
@@ -40,17 +41,26 @@ const GUI = (()=>{
         const editIcon = createAnImg(EditIcon, "taskOptionIcon")
         editIcon.addEventListener("click", ()=>{
             modal.style.display = "block"
-            displayEditTaskGUI(currentListIndex, taskContainer, taskList)            
+            console.log("EDIT TASK CONTAINER INDEX: " + taskContainer.getAttribute("data-state"))
+            console.log("EDIT CURR TASK INDEX: " + currentTask.getTaskIndex)
+            displayEditTaskGUI(currentTask.getTaskIndex, taskContainer, taskList)            
         })
         const deleteIcon = createAnImg(DeleteIcon, "taskOptionIcon")
         deleteIcon.addEventListener("click", ()=>{
+            console.log("TASK CONTAINER INDEX: " + taskContainer.getAttribute("data-state"))
+            console.log("CURR TASK INDEX: " + currentTask.getTaskIndex)
             modal.style.display = "block"
             createDeleteGUI(currentTask.getTaskName, taskContainer, taskList)
         })
         const infoIcon = createAnImg(InfoIcon, "taskOptionIcon")
         infoIcon.addEventListener("click", ()=>{
+            if(tabName === "Project"){
+                displayTaskInformation(taskList.searchTask(taskContainer.getAttribute("data-state")), taskContainer)
+            }else{
+                //We use currentTask to ensure project tasks correspond correctly to their list
+                displayTaskInformation(taskList.searchTask(currentTask.getTaskIndex), taskContainer)
+            }
             modal.style.display = "block"
-            GUI.displayTaskInformation(taskList.searchTask(taskContainer.getAttribute("data-state")), taskContainer)
         })
         rightTaskSideDiv.appendChild(editIcon)
         rightTaskSideDiv.appendChild(deleteIcon)
@@ -79,7 +89,7 @@ const GUI = (()=>{
     const displayEditTaskGUI = (currentTaskIndex, currentTaskContainer, taskList)=>{  //Displays the form to allow user to edit task
         const editForm = createForm("Edit Task", "Edit")
         editForm.setAttribute('id', "EditForm")
-
+        const taskContainerIndex = currentTaskContainer.getAttribute("data-state")
         //Specific eventListeners to delete forms when exited
         const exitBtn = editForm.querySelector(".exitBtn")
         exitBtn.addEventListener("click", ()=>{
@@ -99,7 +109,13 @@ const GUI = (()=>{
             if(currentTask.getPriorityLevel !== taskPriority){  //Prevent duplicate classes on element
                 updatePriorityGUI(currentTaskContainer, currentTask.getPriorityLevel, taskPriority)
             }
-            taskList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
+            if(currentTask.getTaskSource !== "general"){
+                const toDoList = newProjectList.searchForProjectByTitle(currentTask.getTaskSource)
+                toDoList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
+            }else{
+                newList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
+            }
+            taskList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, taskContainerIndex)  //Update merged array
             updateTaskGUI(currentTaskContainer, taskTitle, taskDueDate)  //Update task GUI
 
             closeForm()
@@ -109,7 +125,7 @@ const GUI = (()=>{
         currentTaskContainer.appendChild(editForm)
 
         //Give form current task values for user to edit
-        let currentTask = taskList.searchTask(currentTaskIndex)
+        let currentTask = taskList.searchTask(taskContainerIndex)
         const taskTitle = editForm.querySelector("#title")
         taskTitle.setAttribute("value", currentTask.getTaskName)
         const taskDescr = editForm.querySelector("#description")
@@ -138,22 +154,7 @@ const GUI = (()=>{
         })
 
         //Form body
-        const deleteWarningDiv = createAnElement("div", "deleteWarningDiv")
-        const deleteQuestionP = createAnElement("p", "deleteQuestionP")
-        deleteQuestionP.textContent = "Are you sure?"
-        const deleteWarningMsgDiv = createAnElement("div", "deleteWarningMsgDiv")
-        const deleteWarningMsgP1 = createAnElement("p", "deleteWarningMsgP1")
-        deleteWarningMsgP1.textContent = "Task"
-        const taskNameP = createAnElement("p", "taskNameSpan")
-        taskNameP.textContent = taskName 
-        const deleteWarningMsgP2 = createAnElement("p", "deleteWarningMsgP2")
-        deleteWarningMsgP2.textContent = "will be gone forever!"
-        deleteWarningMsgDiv.appendChild(deleteWarningMsgP1)
-        deleteWarningMsgDiv.appendChild(taskNameP)
-        deleteWarningMsgDiv.appendChild(deleteWarningMsgP2)
-
-        deleteWarningDiv.appendChild(deleteQuestionP)
-        deleteWarningDiv.appendChild(deleteWarningMsgDiv)
+        const deleteWarningDiv = createDeleteWarninMsg("task", taskName)
 
         //Form options
         const formActionBtnsDiv = createFormActionSection("Delete")
@@ -165,6 +166,20 @@ const GUI = (()=>{
         const submitBtn = formActionBtnsDiv.querySelector(".submitBtn")
         submitBtn.addEventListener('click', ()=>{
             deleteTaskGUI(taskContainer)
+            const currentTask = taskList.searchTask(taskContainer.getAttribute("data-state"))
+            const currentTaskIndex = currentTask.getTaskIndex  //Index corresponding to task's original list
+            const currentTaskSource = currentTask.getTaskSource
+            console.log("CURR: " + currentTaskSource)
+            console.log("CUURENT TASK INDEX: " + currentTaskIndex)
+            console.log("TASK CONT INDEX: " + taskContainer.getAttribute("data-state"))
+            if(currentTaskSource !== "general"){
+                const projectToDoList = newProjectList.searchForProjectByTitle(currentTaskSource)
+                projectToDoList.deleteTask(currentTaskIndex)
+                projectToDoList.updateTaskIdnicies()
+            }else{
+                newList.deleteTask(currentTaskIndex)
+            }
+            //Update merged taskList
             taskList.deleteTask(taskContainer.getAttribute("data-state"))
             updateNumTasksGUI()
             taskContainer.removeChild(deleteGUI)
@@ -185,7 +200,7 @@ const GUI = (()=>{
             currentTaskContainer.removeChild(infoContainer)
             modal.style.display = "none"
         })
-    
+        
         const infoSectionDiv = createAnElement("div", "infoSectionDiv")
         const infoCardTitles = ["Title" , "Description", "Due date", "Priority",  "Completion Status"]
         const infoCardContent = [currentTaskIndex.getTaskName, currentTaskIndex.getTaskDescr, currentTaskIndex.getDuedate, currentTaskIndex.getPriorityLevel, currentTaskIndex.getCompletionState]
@@ -207,6 +222,7 @@ const GUI = (()=>{
             currentTaskContainer.removeChild(infoContainer)
             modal.style.display = "none"
         })
+        infoActionDiv.appendChild(infoCancelBtn)
 
         infoContainer.appendChild(infoTitleDiv)
         infoContainer.appendChild(infoSectionDiv)
@@ -281,36 +297,26 @@ const GUI = (()=>{
 const projectGUI = (()=>{
     const displayAddProjectGUI = ()=>{
         const projectsContainer = document.querySelector(".projectsContainer")
-        const addProjectFrom = createAnElement("div", "popUpForm")
-        addProjectFrom.setAttribute("id", "addProjectFrom")
+        const addProjectForm = createProjectForm("Add A Project", "Add")
+        content.appendChild(addProjectForm)
 
-        //Top of form
-        const projectitleDiv = createFormTitleSection("Add A Project")
-        const exitBtn = projectitleDiv.querySelector(".exitBtn")
-        exitBtn.textContent = "x"
+        const exitBtn = addProjectForm.querySelector(".exitBtn")
         exitBtn.addEventListener("click", ()=>{
-            content.removeChild(addProjectFrom)
-            modal.style.display = "none"
+            content.removeChild(addProjectForm)
+            modal.style.display = "none"        
         })
 
-        const formContainer = createAnElement("div", "formContainer")
-        const newProjectForm = createAnElement("form", "form")
-        const projectTitleSection = createFormField("Title", "text")
-        newProjectForm.appendChild(projectTitleSection)
-        formContainer.appendChild(newProjectForm)
-
-        const formActionBtnsDiv = createFormActionSection("Add")
-        const cancelBtn = formActionBtnsDiv.querySelector(".cancelBtn")
+        const cancelBtn = addProjectForm.querySelector(".cancelBtn")
         cancelBtn.addEventListener("click", ()=>{
-            content.removeChild(addProjectFrom)
+            content.removeChild(addProjectForm)
             modal.style.display = "none"
         })
 
-        const submitBtn = formActionBtnsDiv.querySelector(".submitBtn")
+        const submitBtn = addProjectForm.querySelector(".submitBtn")
         submitBtn.addEventListener('click', ()=>{
             //Update project list
-            const projectTitle = formContainer.querySelector("#title").value
-            const newToDoList = new ToDoList()  //Create new list for project
+            const projectTitle = addProjectForm.querySelector("#title").value
+            const newToDoList = new ToDoList(projectTitle)  //Create new list for project
             newProjectList.addProject(newToDoList)
 
             //Update frontend
@@ -319,19 +325,15 @@ const projectGUI = (()=>{
             updateNumProjectsGUI()
             newProject.click()
             closeForm()
-            content.removeChild(addProjectFrom)
+            content.removeChild(addProjectForm)
         })
+        addProjectForm.style.display = "block"
 
-        addProjectFrom.appendChild(projectitleDiv)
-        addProjectFrom.appendChild(formContainer)
-        addProjectFrom.appendChild(formActionBtnsDiv)
-        content.appendChild(addProjectFrom)
-        addProjectFrom.style.display = "block"
     }
     const createProjectSideBarGUI = (projectName, projectList) =>{
         const projectDiv = createAnElement("div", "projectDiv")
         projectDiv.setAttribute("id", "unselectedOption")
-        projectDiv.addEventListener("click", ()=>{
+        projectDiv.addEventListener("click", (e)=>{
             const styledOptionDiv = document.querySelector("#selecetedOption")
             styledOptionDiv.removeAttribute("id")
             projectDiv.setAttribute("id", "selecetedOption")
@@ -349,11 +351,18 @@ const projectGUI = (()=>{
         leftSideDiv.appendChild(projectNameP)
         
         const rightSideDiv = createAnElement("div", "rightSideDiv")
+
         const editIcon = createAnImg(EditIcon, "projectIcon")
         editIcon.addEventListener("click", ()=>{
-
+            modal.style.display = "block"
+            displayEditProjectGUI(projectDiv)
         })
         const deleteIcon = createAnImg(DeleteIcon, "projectIcon")
+        deleteIcon.addEventListener("click", (e)=>{
+            e.stopPropagation(); //Prevents projectDiv eventListener from triggering
+            modal.style.display = "block"
+            displayDeleteProjectGUI(projectDiv, projectName)
+        })
         rightSideDiv.appendChild(editIcon)
         rightSideDiv.appendChild(deleteIcon)
     
@@ -364,28 +373,106 @@ const projectGUI = (()=>{
     const displayProjectGUI = (project, projectList)=>{ 
         swtichTaskHeaderContent(project)
         const projectIndex = project.getAttribute("data-state")
-        console.log(projectIndex)
-        console.log("HEEEEYYY")
         const projectToDoList = projectList.searchForProject(projectIndex)
         projectList.printProjectNames()
         for(let i=0; i<projectToDoList.getListLength(); i++){
             toDoListDiv.appendChild(GUI.displayTaskGUI(i, projectToDoList))
         }
+        GUI.updateNumTasksGUI()
+    }
+    const displayEditProjectGUI = (projectDiv)=>{
+        const projectDivTitle = projectDiv.querySelector(".projectNameP")
+
+        const editProjectForm = createProjectForm("Edit Project", "Edit")
+        content.appendChild(editProjectForm)
+        editProjectForm.style.display = "block"
+
+        const exitBtn = editProjectForm.querySelector(".exitBtn")
+        exitBtn.addEventListener("click", ()=>{
+            content.removeChild(editProjectForm)
+            modal.style.display = "none"        
+        })
+        const cancelBtn = editProjectForm.querySelector(".cancelBtn")
+        cancelBtn.addEventListener("click", ()=>{
+            content.removeChild(editProjectForm)
+            modal.style.display = "none"
+        })
+        const submitBtn = editProjectForm.querySelector(".submitBtn")
+        submitBtn.addEventListener("click", ()=>{
+            const newProjectTitle = editProjectForm.querySelector("#title").value
+            const tabTitle = document.querySelector(".tabTitle")
+            projectDivTitle.textContent = newProjectTitle
+            tabTitle.textContent = newProjectTitle
+            content.removeChild(editProjectForm)
+            modal.style.display = "none"
+        })  
+
+        const currentProjectTitle = projectDivTitle.textContent
+        const titleField = editProjectForm.querySelector("#title")
+        titleField.value = currentProjectTitle
     }
     const updateNumProjectsGUI = ()=>{
         const numProjectsP = document.querySelector(".numProjeccts")
         const numProjects = newProjectList.getProjectListLength()
         numProjectsP.textContent = `(${numProjects})`
     }
-    const displayProjectTasksGUI = (newProjectList)=>{
-        for(let i=0; i<newProjectList.getProjectListLength(); i++){
-            let project = newProjectList.searchForProject(i)
-            for(let j=0; j<project.getListLength(); j++){
-                GUI.displayTaskGUI(j, project)
-            }
-        }
+    const displayDeleteProjectGUI = (projectDiv, projectName)=>{  //deleteType = task or project and deleteTypeName = task/project name
+        const deleteProjectGUI = createAnElement("div", "popUpForm")
+        deleteProjectGUI.setAttribute("id", "deleteProjectGUI")
+
+        //Top of form
+        const deleteTitleDiv = createFormTitleSection("Dekete Project?")
+        deleteTitleDiv.style.background = "rgb(243, 39, 39)"
+        const deleteExitBtn = deleteTitleDiv.querySelector(".exitBtn")
+        deleteExitBtn.addEventListener("click", (e)=>{
+            e.stopPropagation(); //Prevents projectDiv eventListener from triggering
+            projectDiv.removeChild(deleteProjectGUI)
+            modal.style.display = "none"
+        })
+
+        //Form body
+        const deleteWarningDiv = createDeleteWarninMsg("project", projectName)
+
+        //Form options
+        const formActionBtnsDiv = createFormActionSection("Delete")
+        const cancelBtn = formActionBtnsDiv.querySelector(".cancelBtn")
+        cancelBtn.addEventListener("click", (e)=>{
+            e.stopPropagation(); //Prevents projectDiv eventListener from triggering
+            projectDiv.removeChild(deleteProjectGUI)
+            homeOption.click()
+            modal.style.display = "none"
+        })
+        const submitBtn = formActionBtnsDiv.querySelector(".submitBtn")
+        submitBtn.addEventListener('click', (e)=>{
+            e.stopPropagation(); //Prevents projectDiv eventListener from triggering
+            deleteProjectFromSideBarGUI(projectDiv)
+            projectDiv.removeChild(deleteProjectGUI)
+            homeOption.setAttribute("id", "selecetedOption")
+            homeOption.click()
+            modal.style.display = "none"
+        })
+
+        deleteProjectGUI.appendChild(deleteTitleDiv)
+        deleteProjectGUI.appendChild(deleteWarningDiv)
+        deleteProjectGUI.appendChild(formActionBtnsDiv)
+        projectDiv.appendChild(deleteProjectGUI)
+        deleteProjectGUI.style.display = "block"
     }
-    return{displayAddProjectGUI, displayProjectGUI, updateNumProjectsGUI, createProjectSideBarGUI, displayProjectTasksGUI}
+    const deleteProjectFromSideBarGUI = (projectDivToDelete)=>{
+        //Delete project form frontend and backend
+        const projectsContainer = document.querySelector(".projectsContainer")
+        projectsContainer.removeChild(projectDivToDelete)
+        newProjectList.deleteProject(projectDivToDelete.getAttribute("data-state"))
+        updateNumProjectsGUI()
+        
+        let projectGUIIndex = 0;
+        const projects = projectsContainer.querySelectorAll(".projectDiv")
+        projects.forEach(project => {
+            project.setAttribute("data-state", projectGUIIndex)
+            projectGUIIndex++
+        });
+    }
+    return{displayAddProjectGUI, displayProjectGUI, updateNumProjectsGUI, createProjectSideBarGUI, displayDeleteProjectGUI}
 })()
 
 /******************** HELPER FUNCTIONS *********************/
@@ -399,6 +486,7 @@ const formatTaskDate = (dueDate, currentFormat, newFormat)=>{
 }
 const swtichTaskHeaderContent = (optionElement)=>{
     const selecetedOption = optionElement.textContent
+    console.log("SELECTED OPTION: " + selecetedOption)
     let taskHeaderSection = document.querySelector(".taskHeaderSection")
     toDoMainContent.removeChild(taskHeaderSection)
     taskHeaderSection = loadTaskHeaderSection(selecetedOption)
@@ -414,11 +502,24 @@ const swtichTaskHeaderContent = (optionElement)=>{
     const tabTitle = document.querySelector(".tabTitle")
     tabTitle.textContent = selecetedOption
 }
-const addTask = (newToDoList, taskTitle, taskDescr, taskDueDate, taskPriority)=>{  //Add task to frontend and backend
-    newToDoList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority)   //Store values in specified todo list
+const addTask = (newToDoList, taskTitle, taskDescr, taskDueDate, taskPriority, taskSource)=>{  //Add task to frontend and backend
+    newToDoList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, taskSource)   //Store values in specified todo list
     let currentListIndex = newToDoList.getListLength()-1
     toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, newToDoList)) //Create GUI for task
     GUI.updateNumTasksGUI() 
+}
+const mergeTaskLists = (taskList, projectList) =>{
+    const allTasksList = new ToDoList()
+    for(let i=0; i<taskList.getListLength(); i++){
+        allTasksList.addTask(taskList.searchTask(i))
+    }
+    for(let i=0; i<projectList.getProjectListLength(); i++){
+        const projectTaskList = projectList.searchForProject(i)
+        for(let j=0; j<projectTaskList.getListLength(); j++){
+            allTasksList.addTask(projectTaskList.searchTask(j))
+        }
+    }
+    return allTasksList
 }
 /******************** HELPER FUNCTIONS *********************/
 
@@ -429,32 +530,27 @@ let toDoListDiv = document.querySelector(".toDoListDiv") //Container to hold tas
 let tabName = ""  //Allow us to know which tab we're in so we can update newList or the newProjectList correctly
 let currentProjectIndex = ""  //Helps us find the current project we are on in newProjectList
 
-const newList = new ToDoList()  //New array to store task objects
+const newList = new ToDoList("general")  //New array to store task objects
 const newProjectList = new Project() //New array to hold a list of projects, each containing a list of ToDoList objects
-newList.createNewTask("Task A", "dsadas", "2023-07-12", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(0, newList)) //Create GUI for task
-newList.createNewTask("Task B", "dsadas", "2023-07-14", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(1, newList)) //Create GUI for task
-newList.createNewTask("Task C", "dsadas", "2023-07-15", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(2, newList)) //Create GUI for task
-newList.createNewTask("Task D", "dsadas", "2023-07-16", "Low") 
-toDoListDiv.appendChild(GUI.displayTaskGUI(3, newList)) //Create GUI for task
-GUI.updateNumTasksGUI()
+newList.createNewTask("Task A", "dsadas", "2023-07-12", "Low", newList.getToDoListTitle)
+newList.createNewTask("Task B", "dsadas", "2023-07-14", "Low", newList.getToDoListTitle)
+newList.createNewTask("Task C", "dsadas", "2023-07-15", "Low", newList.getToDoListTitle)
+newList.createNewTask("Task D", "dsadas", "2023-07-16", "Low", newList.getToDoListTitle)
 
-const firstNewList = new ToDoList()
-firstNewList.createNewTask("Task AP1", "dsadas", "2023-07-12", "Low") 
-firstNewList.createNewTask("Task AP2", "dsadas", "2023-07-14", "Low") 
-firstNewList.createNewTask("Task AP3", "dsadas", "2023-07-15", "Low") 
-firstNewList.createNewTask("Task AP4", "dsadas", "2023-07-16", "Low") 
+const firstNewList = new ToDoList("Project 1")
+firstNewList.createNewTask("Task AP1", "dsadas", "2023-07-12", "Low", firstNewList.getToDoListTitle) 
+firstNewList.createNewTask("Task AP2", "dsadas", "2023-07-14", "Low", firstNewList.getToDoListTitle) 
+firstNewList.createNewTask("Task AP3", "dsadas", "2023-07-15", "Low", firstNewList.getToDoListTitle) 
+firstNewList.createNewTask("Task AP4", "dsadas", "2023-07-16", "Low", firstNewList.getToDoListTitle)  
 newProjectList.addProject(firstNewList)
 const projectsContainer = document.querySelector(".projectsContainer")
 projectsContainer.appendChild(projectGUI.createProjectSideBarGUI("Project 1", newProjectList))
 
-const secondNewList = new ToDoList()
-secondNewList.createNewTask("Task 1", "dsadas", "2023-07-12", "Low") 
-secondNewList.createNewTask("Task 2", "dsadas", "2023-07-14", "Low") 
-secondNewList.createNewTask("Task 3", "dsadas", "2023-07-15", "Low") 
-secondNewList.createNewTask("Task 4", "dsadas", "2023-07-16", "Low") 
+const secondNewList = new ToDoList("Project 2")
+secondNewList.createNewTask("Task 1", "dsadas", "2023-07-12", "Low", secondNewList.getToDoListTitle)  
+secondNewList.createNewTask("Task 2", "dsadas", "2023-07-14", "Low", secondNewList.getToDoListTitle)  
+secondNewList.createNewTask("Task 3", "dsadas", "2023-07-15", "Low", secondNewList.getToDoListTitle)  
+secondNewList.createNewTask("Task 4", "dsadas", "2023-07-16", "Low", secondNewList.getToDoListTitle)  
 newProjectList.addProject(secondNewList)
 projectsContainer.appendChild(projectGUI.createProjectSideBarGUI("Project 2", newProjectList))
 projectGUI.updateNumProjectsGUI()
@@ -464,11 +560,10 @@ const homeOption = document.querySelector(".optionDiv")
 homeOption.setAttribute("id", "selecetedOption")
 
 //Load saved tasks
-GUI.displayListOfTasksGUI(newList, "home")
-for(let i=0; i<newProjectList.getProjectListLength(); i++){
-    let project = newProjectList.searchForProject(i)
-    GUI.displayListOfTasksGUI(project, "home")
-}
+const allTasksList = mergeTaskLists(newList, newProjectList)//Make a list of all general and project tasks
+allTasksList.printTasks()
+GUI.displayListOfTasksGUI(allTasksList, "home")
+GUI.updateNumTasksGUI()
 
 //FORM HANDLING FOR ADDING TASKS
 const submitBtn = document.querySelector(".submitBtn")
@@ -481,14 +576,14 @@ submitBtn.addEventListener("click", (e)=>{
 
         if(tabName === "Project"){ //Add to project's todo list
             const newToDoList = newProjectList.searchForProject(currentProjectIndex)
-            addTask(newToDoList, taskTitle, taskDescr, taskDueDate, taskPriority)
+            addTask(newToDoList, taskTitle, taskDescr, taskDueDate, taskPriority, newToDoList.getToDoListTitle)
             console.log("PRINTING. . . ")
             newProjectList.printProjectNames()
             console.log("PRINTING NEWLIST. . . ")
             newList.printTasks()
         }else{ //Add tasks to general todo list
             console.log("HEEE")
-            addTask(newList, taskTitle, taskDescr, taskDueDate, taskPriority)
+            addTask(newList, taskTitle, taskDescr, taskDueDate, taskPriority, newList.getToDoListTitle)
         }
 
         closeForm()
@@ -504,15 +599,14 @@ mainSidebarOptions.forEach(option => {
         const selecetedOption = option.textContent.toLocaleLowerCase()
         //Change page and style option to indicate that
         swtichTaskHeaderContent(option)
-        const selectedDiv = document.querySelector("#selecetedOption")
-        selectedDiv.removeAttribute("id")
+        const selectedDiv = document.querySelectorAll("#selecetedOption")
+        selectedDiv.forEach(div => {
+            div.removeAttribute("id")
+        });
         option.setAttribute("id", "selecetedOption")   
-
-        GUI.displayListOfTasksGUI(newList, selecetedOption)
-        for(let i=0; i<newProjectList.getProjectListLength(); i++){
-            let project = newProjectList.searchForProject(i)
-            GUI.displayListOfTasksGUI(project, selecetedOption)
-        }
+        
+        const allTasksList = mergeTaskLists(newList, newProjectList)//update list
+        GUI.displayListOfTasksGUI(allTasksList, selecetedOption)
         GUI.updateNumTasksGUI()
     })
 });

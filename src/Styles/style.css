@@ -115,6 +115,7 @@ body{
 .optionIcon{
     width: 25px;
     height: 25px;
+    z-index: 10;
 }
 
 .optionText{
@@ -516,7 +517,8 @@ body{
 }
 
 /*DELETE FORM GUI*/
-#deleteGUI{
+#deleteGUI,
+#deleteProjectGUI{
     width: 420px;
     max-width: 100vw;
     max-height: 300px;
@@ -554,7 +556,8 @@ body{
     font-weight: 1000;
 }
 
-#deleteGUI .submitBtn{
+#deleteGUI .submitBtn,
+#deleteProjectGUI .submitBtn{
     background-color: rgb(243, 39, 39); 
 }
 
