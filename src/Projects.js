@@ -18,11 +18,6 @@ class Project{
             console.log("THE TASK INFO: " + project.printTasks())
         });
     }
-    printSpecificProjectTask(projectName){
-        for(let projectName in this.projectList){
-            console.log("ALL TASKS: " + this.projectList[projectName])
-        }
-    }
     deleteProject(projectIndex){
         if(projectIndex > -1){
             this.projectList.splice(projectIndex, 1)

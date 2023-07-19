@@ -51,7 +51,11 @@ class Task{
         return this.description = description
     }
     set setDuedate(dueDate){
-        return this.dueDate = this.formatDueDate(dueDate)
+        if(dueDate !== ""){
+            return this.dueDate = this.formatDueDate(dueDate)
+        }else{
+            return this.dueDate = "No due date"
+        }
     }
     set setTriorityLevel(priority){
         return this.priority = priority

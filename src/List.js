@@ -61,6 +61,11 @@ class ToDoList{
             newTaskIndex++
         });
     }
+    updateTaskSources(newTitle){   //Update sources to continue matching them correctly to their list
+        this.list.forEach(task =>{
+            task.setTaskSource = newTitle
+        })
+    }
     isDueToday(taskIndex){
         const todayDate = format(new Date(),'MM-dd-yyyy');
         const taskDueDate = this.searchTask(taskIndex).getDuedate
