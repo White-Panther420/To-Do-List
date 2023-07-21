@@ -1,4 +1,4 @@
-import {parse, format} from "date-fns"
+import {parse, format, isValid} from "date-fns"
 
 class Task{
     constructor(title, description, dueDate, priority="Low", isComplete="Incomplete", taskIndex, taskSource ="general"){
@@ -6,7 +6,7 @@ class Task{
         this.description = description
 
         //Change date format
-        if(dueDate !== ""){
+        if(dueDate !== "" && dueDate !== "No due date"){
             this.dueDate = this.formatDueDate(dueDate)
         }else{
             this.dueDate = "No due date"
@@ -72,6 +72,9 @@ class Task{
 
     formatDueDate(dueDate){
         const dateString = dueDate
+        if(isValid(parse(dateString, "MM-dd-yyyy", new Date()))){ //Check if date is already in MM-dd-yyyy format
+            return dateString
+        }
         const date = parse(dateString, "yyyy-MM-dd", new Date())  
         let formatedDate = format(date, "MM-dd-yyyy")
         return formatedDate

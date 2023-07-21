@@ -1,11 +1,26 @@
 import { Task } from "./Task";
 import {parse, format, startOfWeek, endOfWeek, isWithinInterval} from "date-fns"
 class ToDoList{
-    constructor(listTitle){
-        this.list = []
+    constructor(newList, listTitle){
+        if(newList === ""){
+            this.list = []
+        }else{
+            this.list = newList
+            for(let i=0; i<this.getListLength(); i++){
+                this.list[i] = new Task(
+                    this.list[i].title, 
+                    this.list[i].description, 
+                    this.list[i].dueDate, 
+                    this.list[i].priority, 
+                    this.list[i].isComplete, 
+                    this.list[i].taskIndex, 
+                    this.list[i].taskSource
+                )
+            }
+            
+        }
         this.listTitle = listTitle  //Give each list a unique identifier to help delete correct task from a project
     }
-
     get getToDoListTitle(){
         return this.listTitle
     }
@@ -15,11 +30,6 @@ class ToDoList{
 
     addTask(task){
         this.list.push(task)
-    }
-    printTasks(){
-        this.list.forEach(task => {
-            console.log(task)
-        });
     }
     getListLength(){
         return this.list.length

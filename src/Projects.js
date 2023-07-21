@@ -4,19 +4,8 @@ class Project{
     constructor(){
         this.projectList = []
     }
-
     addProject(toDoList){
         this.projectList.push(toDoList)
-    }
-    printProjectNames(){
-        this.projectList.forEach(project => {
-            console.log(project)
-        });
-    }
-    printProjectTasks(){
-        this.projectList.forEach(project => {
-            console.log("THE TASK INFO: " + project.printTasks())
-        });
     }
     deleteProject(projectIndex){
         if(projectIndex > -1){
