@@ -105,9 +105,7 @@ const GUI = (()=>{
                 updatePriorityGUI(currentTaskContainer, currentTask.getPriorityLevel, taskPriority)
             }
             if(currentTask.getTaskSource !== "general"){
-                const currentProjectDiv = document.querySelector("#selecetedOption")
-                const currentProjectIndex = currentProjectDiv.getAttribute("data-state")
-                const toDoList = newProjectList.searchForProject(currentProjectIndex)
+                const toDoList = newProjectList.searchForProjectByTitle(currentTask.getTaskSource)
                 toDoList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
             }else{
                 newList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
@@ -173,9 +171,7 @@ const GUI = (()=>{
             console.log("CUURENT TASK INDEX: " + currentTaskIndex)
             console.log("TASK CONT INDEX: " + taskContainer.getAttribute("data-state"))
             if(currentTaskSource !== "general"){
-                const currentProjectDiv = document.querySelector("#selecetedOption")
-                const currentProjectIndex = currentProjectDiv.getAttribute("data-state")
-                const projectToDoList = newProjectList.searchForProject(currentProjectIndex)
+                const projectToDoList = newProjectList.searchForProjectByTitle(currentTaskSource)
                 projectToDoList.deleteTask(currentTaskIndex)
                 projectToDoList.updateTaskIdnicies()
             }else{

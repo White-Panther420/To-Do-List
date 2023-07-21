@@ -26,6 +26,14 @@ class Project{
     searchForProject(projectIndex){
         return this.projectList[projectIndex]
     }
+    searchForProjectByTitle(projectTitle){
+        for(let i=0; i<this.getProjectListLength(); i++){
+            if(this.projectList[i].getToDoListTitle === projectTitle){
+                let project = this.projectList[i]
+                return project
+            }
+        }
+    }
     getProjectListLength(){
         return this.projectList.length
     }
