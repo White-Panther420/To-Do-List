@@ -12,8 +12,12 @@ class Project{
             this.projectList.splice(projectIndex, 1)
         }
     }
-    searchForProject(projectIndex){
+    searchForProjectByIndex(projectIndex){
         return this.projectList[projectIndex]
+    }
+    searchForPrjectByTitle(projectTitle){
+        const result = this.projectList.filter(project => project.getToDoListTitle === projectTitle)
+        return result
     }
     getProjectListLength(){
         return this.projectList.length

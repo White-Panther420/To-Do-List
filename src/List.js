@@ -1,7 +1,7 @@
 import { Task } from "./Task";
 import {parse, format, startOfWeek, endOfWeek, isWithinInterval} from "date-fns"
 class ToDoList{
-    constructor(newList, listTitle){
+    constructor(newList, listTitle, listIndex){
         if(newList === ""){
             this.list = []
         }else{
@@ -20,6 +20,7 @@ class ToDoList{
             
         }
         this.listTitle = listTitle  //Give each list a unique identifier to help delete correct task from a project
+        this.listIndex = listIndex  //Give each list a unique identifier to help delete correct position in project lsit 
     }
     get getToDoListTitle(){
         return this.listTitle
@@ -63,7 +64,7 @@ class ToDoList{
             currentTask.setCompletionState="Incomplete"
         }
     }
-    updateTaskIdnicies = ()=>{
+    updateTaskIndicies = ()=>{
         //Update indicies to continue matching them correctly to their list
         let newTaskIndex = 0
         this.list.forEach(task => {

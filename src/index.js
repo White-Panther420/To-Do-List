@@ -104,14 +104,18 @@ const GUI = (()=>{
                 //with the same title exists
                 const currentProjectDiv = document.querySelector("#selecetedOption")
                 const currentProjectIndex = currentProjectDiv.getAttribute("data-state")
-                const toDoList = newProjectList.searchForProject(currentProjectIndex)
+                const toDoList = newProjectList.searchForProjectByIndex(currentProjectIndex)
                 toDoList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
+                storeToDoListInStorage(toDoList, toDoList.getToDoListTitle)
+
             }else{
                 newList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, currentTaskIndex)  //Update Array
+                storeToDoListInStorage(newList, newList.getToDoListTitle)
             }
             if(tabName !== "Project"){
                 //Update merged taskList
                 taskList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, taskContainerIndex) 
+                storeToDoListInStorage(taskList, taskList.getToDoListTitle)
             }
             updateTaskGUI(currentTaskContainer, taskTitle, taskDueDate)  //Update task GUI
 
@@ -166,20 +170,35 @@ const GUI = (()=>{
             const currentTask = taskList.searchTask(taskContainer.getAttribute("data-state"))
             const currentTaskIndex = currentTask.getTaskIndex  //Index corresponding to task's original list
             const currentTaskSource = currentTask.getTaskSource
+            const currentTaskName = currentTask.getTaskName
             if(currentTaskSource !== "general"){
-                const currentProjectDiv = document.querySelector("#selecetedOption")
-                const currentProjectIndex = currentProjectDiv.getAttribute("data-state")
-                const projectToDoList = newProjectList.searchForProject(currentProjectIndex)
+                //Get project index
+                const listResult = newProjectList.searchForPrjectByTitle(currentTaskSource)
+                let projectToDoList
+                if(listResult.length > 1){  //Check if more than one project with the same title exists
+                    for(let i=0; i<listResult.length; i++){
+                        if(listResult[i].searchTask(currentTaskIndex).getTaskName === currentTaskName){
+                            projectToDoList = listResult[i]
+                            break
+                        }else{
+                            continue
+                        }
+                    }
+                }else{
+                    projectToDoList = listResult[0]
+                }
                 deleteTaskFromStorage(projectToDoList, projectToDoList.getToDoListTitle, currentTaskIndex)
                 projectToDoList.deleteTask(currentTaskIndex)
-                projectToDoList.updateTaskIdnicies()
+                projectToDoList.updateTaskIndicies()
             }else{
                 deleteTaskFromStorage(newList, newList.getToDoListTitle, currentTaskIndex)
                 newList.deleteTask(currentTaskIndex)
+                newList.updateTaskIndicies()
             }
             if(tabName !== "Project"){
                 //Update merged taskList
                 taskList.deleteTask(taskContainer.getAttribute("data-state"))
+                taskList.updateTaskIndicies()
             }
 
             updateNumTasksGUI()
@@ -320,7 +339,7 @@ const projectGUI = (()=>{
         submitBtn.addEventListener('click', ()=>{
             //Update project list
             const projectTitle = addProjectForm.querySelector("#title").value
-            const newToDoList = new ToDoList("",projectTitle)  //Create new list for project
+            const newToDoList = new ToDoList("",projectTitle, newProjectList.getProjectListLength()-1)  //Create new list for project
             newProjectList.addProject(newToDoList)
 
             //Update frontend
@@ -379,7 +398,7 @@ const projectGUI = (()=>{
     const displayProjectGUI = (project, projectList)=>{ 
         swtichTaskHeaderContent(project)
         const projectIndex = project.getAttribute("data-state")
-        const projectToDoList = projectList.searchForProject(projectIndex)
+        const projectToDoList = projectList.searchForProjectByIndex(projectIndex)
         for(let i=0; i<projectToDoList.getListLength(); i++){
             toDoListDiv.appendChild(GUI.displayTaskGUI(i, projectToDoList))
         }
@@ -411,7 +430,7 @@ const projectGUI = (()=>{
             content.removeChild(editProjectForm)
             modal.style.display = "none"
 
-            const toDoList = newProjectList.searchForProject(projectDivIndex)
+            const toDoList = newProjectList.searchForProjectByIndex(projectDivIndex)
             toDoList.setToDoListTItle = newProjectTitle
             toDoList.updateTaskSources(newProjectTitle)
         })  
@@ -517,26 +536,23 @@ const swtichTaskHeaderContent = (optionElement)=>{
     const tabTitle = document.querySelector(".tabTitle")
     tabTitle.textContent = selecetedOption
 }
-const addTask = (newToDoList, taskTitle, taskDescr, taskDueDate, taskPriority, taskSource)=>{  //Add task to frontend and backend
-    newToDoList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, taskSource)   //Store values in specified todo list
-    let currentListIndex = newToDoList.getListLength()-1
-    const newTaskGUI = GUI.displayTaskGUI(currentListIndex, newToDoList)  //Create GUI for task
-    storeToDoListInStorage(newToDoList, newToDoList.getToDoListTitle)
-    toDoListDiv.appendChild(newTaskGUI) 
-    GUI.updateNumTasksGUI() 
-}
+
 const mergeTaskLists = (taskList, projectList) =>{
-    const allTasksList = new ToDoList("", "general")
-    for(let i=0; i<taskList.getListLength(); i++){
-        allTasksList.addTask(taskList.searchTask(i))
+    const allTasks = new ToDoList("", "general", "")
+    const taskListDeepCopyJSON = JSON.parse(JSON.stringify(taskList))
+    let taskListDeepCopyList = new ToDoList(taskListDeepCopyJSON.list, taskListDeepCopyJSON.listTitle, "")
+    for(let i=0; i<taskListDeepCopyList.getListLength(); i++){
+        allTasks.addTask(taskListDeepCopyList.searchTask(i))
     }
+
     for(let i=0; i<projectList.getProjectListLength(); i++){
-        const projectTaskList = projectList.searchForProject(i)
-        for(let j=0; j<projectTaskList.getListLength(); j++){
-            allTasksList.addTask(projectTaskList.searchTask(j))
+        const projectTaskListDeepCopyJSON = JSON.parse(JSON.stringify(projectList.searchForProjectByIndex(i)))
+        let projectListDeepCopyList = new ToDoList(projectTaskListDeepCopyJSON.list, projectTaskListDeepCopyJSON.listTitle, "")
+        for(let j=0; j<projectListDeepCopyList.getListLength(); j++){
+            allTasks.addTask(projectListDeepCopyList.searchTask(j))
         }
     }
-    return allTasksList
+    return allTasks
 }
 /******************** HELPER FUNCTIONS *********************/
 
@@ -548,7 +564,11 @@ const storeToDoListInStorage = (toDoListToBeStored, toDoListTitle)=>{
 const deleteTaskFromStorage = (toDoList, toDoListTitle, taskIndex)=>{
     let dataJSON = retrieveDataFromLocalStorage(toDoListTitle)
     let retrievedToDoList = dataJSON.list
-    retrievedToDoList.splice(taskIndex)
+    retrievedToDoList.splice(taskIndex, 1)
+    for(let i=0; i<retrievedToDoList.length; i++){
+        retrievedToDoList[i].taskIndex = i
+    }
+    storeToDoListInStorage(dataJSON, dataJSON.listTitle)
 }
 const retrieveDataFromLocalStorage = (itemKey) =>{
     let stringData = localStorage.getItem(itemKey)
@@ -566,7 +586,7 @@ let toDoListDiv = document.querySelector(".toDoListDiv") //Container to hold tas
 let tabName = ""  //Allow us to know which tab we're in so we can update newList or the newProjectList correctly
 let currentProjectIndex = ""  //Helps us find the current project we are on in newProjectList
 
-let newList = new ToDoList("","general")  //New array to store task objects
+let newList = new ToDoList("","general", "")  //New array to store task objects
 let newProjectList = new Project() //New array to hold a list of projects, each containing a list of ToDoList objects
 // newList.createNewTask("Task A", "dsadas", "2023-07-12", "Low", newList.getToDoListTitle)
 // newList.createNewTask("Task B", "dsadas", "2023-07-14", "Low", newList.getToDoListTitle)
@@ -596,6 +616,7 @@ const homeOption = document.querySelector(".optionDiv")
 homeOption.setAttribute("id", "selecetedOption")
 
 //Load saved tasks
+let allTasks
 if(localStorage.length === 0){
 }else{
     for(let i=0; i<localStorage.length; i++){
@@ -606,7 +627,7 @@ if(localStorage.length === 0){
                 newList = new ToDoList(toDoListJSON.list, toDoListJSON.listTitle)
                 //GUI.displayListOfTasksGUI(newList, "home")    
             }else{
-                let newProjectToDoList = new ToDoList(toDoListJSON.list, toDoListJSON.listTitle)
+                let newProjectToDoList = new ToDoList(toDoListJSON.list, toDoListJSON.listTitle, toDoListJSON.listIndex)
                 newProjectList.addProject(newProjectToDoList)
                 //GUI.displayListOfTasksGUI(newProjectToDoList, "home")    
                 const projectsContainer = document.querySelector(".projectsContainer")
@@ -614,10 +635,10 @@ if(localStorage.length === 0){
             }
             console.log("LALALA: " + toDoListJSON.list[0])
         }
-    }
-    const allTasks = mergeTaskLists(newList, newProjectList)
-    GUI.displayListOfTasksGUI(allTasks, "home")    
+    } 
 }
+allTasks = mergeTaskLists(newList, newProjectList)
+GUI.displayListOfTasksGUI(allTasks, "home")   
 
 
 
@@ -651,12 +672,19 @@ submitBtn.addEventListener("click", (e)=>{
         const taskPriority = document.getElementById("priority").value
 
         if(tabName === "Project"){ //Add to project's todo list
-            const newToDoList = newProjectList.searchForProject(currentProjectIndex)
-            addTask(newToDoList, taskTitle, taskDescr, taskDueDate, taskPriority, newToDoList.getToDoListTitle)
+            const newToDoList = newProjectList.searchForProjectByIndex(currentProjectIndex)
+            newToDoList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, newToDoList.getToDoListTitle)
+            storeToDoListInStorage(newToDoList, newToDoList.getToDoListTitle)
+            let currentListIndex = newToDoList.getListLength()-1
+            toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, newToDoList))
         }else{ //Add tasks to general todo list
-            addTask(newList, taskTitle, taskDescr, taskDueDate, taskPriority, newList.getToDoListTitle)
+            allTasks.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, allTasks.getToDoListTitle)
+            newList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, newList.getToDoListTitle)
+            storeToDoListInStorage(allTasks, allTasks.getToDoListTitle)
+            let currentListIndex = allTasks.getListLength()-1
+            toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, allTasks))
         }
-
+        GUI.updateNumTasksGUI() 
         closeForm()
         e.preventDefault();  //Prevents form from sending data to backend by default
     }
