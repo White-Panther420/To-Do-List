@@ -1,65 +1,79 @@
 import { Task } from "./Task";
 import {parse, format, startOfWeek, endOfWeek, isWithinInterval} from "date-fns"
-class ToDoList{
-    constructor(listTitle){
-        this.list = []
-        this.listTitle = listTitle  //Give each list a unique identifier to help delete correct task from a project
-    }
+import uniqid from 'uniqid';
 
+class ToDoList{
+    constructor(newList, listTitle, listID){
+        if(newList === ""){
+            this.list = []
+        }else{
+            this.list = newList  //NewList is a deep copy form local storage
+            for(let i=0; i<this.getListLength(); i++){
+                this.list[i] = new Task(
+                    this.list[i].title, 
+                    this.list[i].description, 
+                    this.list[i].dueDate, 
+                    this.list[i].priority, 
+                    this.list[i].isComplete, 
+                    this.list[i].taskSource,
+                    this.list[i].taskID
+                )
+            }
+        }
+        this.listTitle = listTitle
+        this.listID = listID  //Give each list a unique identifier to easily delete task
+    }
+    get getToDoListID(){
+        return this.listID
+    }
     get getToDoListTitle(){
         return this.listTitle
     }
-    set setToDoListTItle(listTitle){
+
+    set setToDoListID(listID){
+        return this.listID = listID
+    }
+    set setToDoListTitle(listTitle){
         return this.listTitle = listTitle
     }
+    
 
     addTask(task){
         this.list.push(task)
     }
-    printTasks(){
-        this.list.forEach(task => {
-            console.log(task)
-        });
-    }
     getListLength(){
         return this.list.length
     }
-    searchTask(taskIndex){
+    searchTaskByIndex(taskIndex){
         return this.list[taskIndex]
     }
-    deleteTask(taskIndex){
-        if(taskIndex > -1){
-            this.list.splice(taskIndex,1)
-        }
+    searchTaskByUniqueID(taskID){
+        return this.list.find(task => task.getTaskID == taskID)
+    }
+    deleteTask(taskID){
+        let taskToBeDeleted = this.searchTaskByUniqueID(taskID)
+        let indexOfTaskToBeDeleted = this.list.indexOf(taskToBeDeleted)
+        this.list.splice(indexOfTaskToBeDeleted, 1)
     }
     createNewTask = (taskTitle, taskDescr, taskDueDate, taskPriority, taskSource)=>{
-        const taskIndex = this.getListLength()  //Will help us when deleting project-based tasks
-        let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "Incomplete", taskIndex, taskSource)
-        this.addTask(newTask)
+        let newTask = new Task(taskTitle, taskDescr, taskDueDate, taskPriority, "Incomplete", taskSource, uniqid())
+        return newTask
     }   
-    updateTaskInfo = (taskTitle, taskDescr, taskDueDate, taskPriority, taskIndex)=>{
-        const currentTask = this.searchTask(taskIndex)
+    updateTaskInfo = (taskTitle, taskDescr, taskDueDate, taskPriority, taskID)=>{
+        const currentTask = this.searchTaskByUniqueID(taskID)
         currentTask.setTaskName = taskTitle
         currentTask.setTaskDescr = taskDescr
         currentTask.setDuedate = taskDueDate
         currentTask.setTriorityLevel = taskPriority
     }
-    updateTaskStatus = (taskContainerIndex)=>{
-        const currentTask = this.searchTask(taskContainerIndex)
+    updateTaskStatus = (taskID)=>{
+        const currentTask = this.searchTaskByUniqueID(taskID)
         if(currentTask.getCompletionState === "Incomplete"){
             currentTask.setCompletionState="Complete"
         }
         else{
             currentTask.setCompletionState="Incomplete"
         }
-    }
-    updateTaskIdnicies = ()=>{
-        //Update indicies to continue matching them correctly to their list
-        let newTaskIndex = 0
-        this.list.forEach(task => {
-            task.setTaskIndex = newTaskIndex
-            newTaskIndex++
-        });
     }
     updateTaskSources(newTitle){   //Update sources to continue matching them correctly to their list
         this.list.forEach(task =>{
@@ -68,13 +82,13 @@ class ToDoList{
     }
     isDueToday(taskIndex){
         const todayDate = format(new Date(),'MM-dd-yyyy');
-        const taskDueDate = this.searchTask(taskIndex).getDuedate
+        const taskDueDate = this.searchTaskByIndex(taskIndex).getDuedate
         if(taskDueDate === todayDate){
             return true
         }
     }
     isDueThisWeek(taskIndex){
-        const taskDueDate = parse(this.searchTask(taskIndex).getDuedate, "MM-dd-yyyy", new Date())
+        const taskDueDate = parse(this.searchTaskByIndex(taskIndex).getDuedate, "MM-dd-yyyy", new Date())
         const startOfCurrentWeek = startOfWeek(new Date())
         const endOfCurrentWeek = endOfWeek(new Date())
         const isWithinCurrentWeek = isWithinInterval(taskDueDate, { start: startOfCurrentWeek, end: endOfCurrentWeek });
@@ -83,13 +97,13 @@ class ToDoList{
         }
     }
     checkTaskImportance(taskIndex){
-        const taskPriority = this.searchTask(taskIndex).getPriorityLevel
+        const taskPriority = this.searchTaskByIndex(taskIndex).getPriorityLevel
         if(taskPriority.toLowerCase() === "high"){
             return true
         }
     }
     checkTaskCompletionStatus(taskIndex){
-        const checkTaskCompletionStatus = this.searchTask(taskIndex).getCompletionState
+        const checkTaskCompletionStatus = this.searchTaskByIndex(taskIndex).getCompletionState
         if(checkTaskCompletionStatus.toLowerCase() === "complete"){
             return true
         }
