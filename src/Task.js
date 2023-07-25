@@ -1,7 +1,6 @@
 import {parse, format, isValid} from "date-fns"
-
 class Task{
-    constructor(title, description, dueDate, priority="Low", isComplete="Incomplete", taskIndex, taskSource ="general"){
+    constructor(title, description, dueDate, priority="Low", isComplete="Incomplete", taskSource ="general", taskID){
         this.title = title
         this.description = description
 
@@ -14,10 +13,8 @@ class Task{
         
         this.priority = priority
         this.isComplete = isComplete
-        //Additional attribute to help tie tasks to their respective lists when deleting tasks
-        this.taskIndex = taskIndex 
-        //Additional attribute to help differentiate project tasks from general tasks when deleting tasks from upper tabs
-        this.taskSource = taskSource
+        this.taskID = taskID   //Unique task ID
+        this.taskSource = taskSource  //Unique ID of To Do List the task belongs to
     }
 
     //Getters
@@ -36,8 +33,8 @@ class Task{
     get getCompletionState(){
         return this.isComplete
     }
-    get getTaskIndex(){
-        return this.taskIndex
+    get getTaskID(){
+        return this.taskID
     }
     get getTaskSource(){
         return this.taskSource
@@ -63,8 +60,8 @@ class Task{
     set setCompletionState(isComplete){
         return this.isComplete = isComplete
     }
-    set setTaskIndex(taskIndex){
-        return this.taskIndex = taskIndex
+    set setTaskId(taskID){
+        return this.taskID = taskID
     }
     set setTaskSource(taskSource){
         return this.taskSource = taskSource

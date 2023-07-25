@@ -1,5 +1,3 @@
-import { ToDoList } from "./List";
-
 class Project{
     constructor(){
         this.projectList = []
@@ -12,12 +10,11 @@ class Project{
             this.projectList.splice(projectIndex, 1)
         }
     }
-    searchForProjectByIndex(projectIndex){
-        return this.projectList[projectIndex]
+    searchForProjectByIndex(projectToDoListIndex){
+        return this.projectList[projectToDoListIndex]
     }
-    searchForPrjectByTitle(projectTitle){
-        const result = this.projectList.filter(project => project.getToDoListTitle === projectTitle)
-        return result
+    searchForProjectByID(toDoListID){
+        this.projectList.find(project => project.getToDoListID === toDoListID)
     }
     getProjectListLength(){
         return this.projectList.length
