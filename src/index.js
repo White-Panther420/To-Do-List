@@ -7,6 +7,7 @@ import InfoIcon from "./Assets/Info.png"
 import ProjectIcon from "./Assets/Project.png"
 import { loadPage, loadTaskHeaderSection} from "./loadPage"
 import { createAnElement, createAnImg, createInput, createForm, closeForm, createFormActionSection, createFormTitleSection, createProjectForm, createDeleteWarninMsg} from "./formAndElements"
+import uniqid from 'uniqid';
 import {format, parse} from "date-fns"
 
 //Load the constant part of page (header, sidebar, and some of body)
@@ -59,7 +60,14 @@ const GUI = (()=>{
     
         completedCheckCircle.addEventListener("click", ()=>{
             GUI.displayTaskStatus(completedCheckCircle, taskNameP)
-            taskList.updateTaskStatus(addedTaskID)
+            if(currentTask.getTaskSource !== "general"){
+                const toDoList = newProjectList.searchForProjectByID(currentTask.getTaskSource)
+                toDoList.updateTaskStatus(addedTaskID)
+                storeToDoListInStorage(toDoList, toDoList.getToDoListID)
+            }else{
+                newList.updateTaskStatus(addedTaskID)
+                storeToDoListInStorage(newList, newList.getToDoListID)
+            }
         })
 
         //For completed tasks that need to be displayed as completed when loadng them in
@@ -102,8 +110,7 @@ const GUI = (()=>{
             if(currentTask.getTaskSource !== "general"){
                 //Grab data attribute from project container to ensure we select the correct project if more than one
                 //with the same title exists
-                const currentProjectIndex = document.querySelector("#selecetedOption").getAttribute("data-state")
-                const toDoList = newProjectList.searchForProjectByIndex(currentProjectIndex)
+                const toDoList = newProjectList.searchForProjectByID(currentTask.getTaskSource)
                 toDoList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, addedTaskID)  //Update Array
                 storeToDoListInStorage(toDoList, toDoList.getToDoListID)
 
@@ -318,11 +325,12 @@ const projectGUI = (()=>{
         submitBtn.addEventListener('click', ()=>{
             //Update project list
             const projectTitle = addProjectForm.querySelector("#title").value
-            const newToDoList = new ToDoList("", projectTitle, uniqid(`${projectTitle}-`))  //Create new list for project
+            const newToDoList = new ToDoList("", projectTitle, uniqid())  //Create new list for project
             newProjectList.addProject(newToDoList)
-
+            storeToDoListInStorage(newToDoList, newToDoList.getToDoListID)
+            
             //Update frontend
-            const newProject = createProjectSideBarGUI(projectTitle, newProjectList, newProjectList.getToDoListID)
+            const newProject = createProjectSideBarGUI(projectTitle, newProjectList, newToDoList.getToDoListID)
             projectsContainer.appendChild(newProject)
             updateNumProjectsGUI()
             newProject.click()
@@ -405,8 +413,8 @@ const projectGUI = (()=>{
             modal.style.display = "none"
 
             const toDoList = newProjectList.searchForProjectByID(projectListID)
-            toDoList.setToDoListTItle = newProjectTitle
-            toDoList.updateTaskSources(newProjectTitle)
+            toDoList.setToDoListTitle = newProjectTitle  
+            storeToDoListInStorage(toDoList, toDoList.getToDoListID)
         })  
 
         const currentProjectTitle = projectDivTitle.textContent
@@ -462,16 +470,10 @@ const projectGUI = (()=>{
     const deleteProjectFromSideBarGUI = (projectDivToDelete, addedProjectID)=>{
         //Delete project form frontend and backend
         const projectsContainer = document.querySelector(".projectsContainer")
-        const projectTitle = projectDivToDelete.querySelector(".projectNameP").textContent
         projectsContainer.removeChild(projectDivToDelete)
+        let toDoListToBeDeleted = newProjectList.searchForProjectByIndex(projectDivToDelete.getAttribute("data-state"))
         newProjectList.deleteProject(projectDivToDelete.getAttribute("data-state"))
-        
-        for(let i=0; i<allTasks.getListLength(); i++){
-            if(allTasks.searchTask(i).getTaskSource === addedProjectID){
-                allTasks.deleteTask(i)
-                i-- //Account for shifted indexes after deletion
-            }
-        }
+        localStorage.removeItem(toDoListToBeDeleted.getToDoListID)
         updateNumProjectsGUI()
         
         let projectGUIIndex = 0;
@@ -539,11 +541,7 @@ const deleteTaskFromStorage = (toDoListID, taskToBeDeletedID)=>{
             break;
         }
     }
-    if(retrievedToDoList.length === 0){
-        localStorage.removeItem(toDoListID)
-    }else{
-        storeToDoListInStorage(dataJSON, dataJSON.listID)
-    }
+    storeToDoListInStorage(dataJSON, dataJSON.listID)
 }
 const retrieveDataFromLocalStorage = (itemKey) =>{
     let stringData = localStorage.getItem(itemKey)
@@ -581,7 +579,7 @@ if(localStorage.length === 0){
                 let newProjectToDoList = new ToDoList(toDoListJSON.list, toDoListJSON.listTitle, toDoListJSON.listID)
                 newProjectList.addProject(newProjectToDoList)
                 const projectsContainer = document.querySelector(".projectsContainer")
-                projectsContainer.appendChild(projectGUI.createProjectSideBarGUI(newProjectToDoList.getToDoListTitle, newProjectList, newProjectList.getToDoListID))
+                projectsContainer.appendChild(projectGUI.createProjectSideBarGUI(newProjectToDoList.getToDoListTitle, newProjectList, newProjectToDoList.getToDoListID))
             }
         }
     } 
@@ -589,6 +587,7 @@ if(localStorage.length === 0){
 allTasks = mergeTaskLists(newList, newProjectList)
 GUI.displayListOfTasksGUI(allTasks, "home")   
 GUI.updateNumTasksGUI()
+projectGUI.updateNumProjectsGUI()
 
 //FORM HANDLING FOR ADDING TASKS
 const submitBtn = document.querySelector(".submitBtn")
@@ -603,10 +602,9 @@ submitBtn.addEventListener("click", (e)=>{
             const currentProjectIndex = document.querySelector("#selecetedOption").getAttribute("data-state")
             const newToDoList = newProjectList.searchForProjectByIndex(currentProjectIndex)
             let currentListIndex = newToDoList.getListLength()
-            newToDoList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, newToDoList.getToDoListID)
+            const newTask = newToDoList.createNewTask(taskTitle, taskDescr, taskDueDate, taskPriority, newToDoList.getToDoListID)
+            newToDoList.addTask(newTask)
             storeToDoListInStorage(newToDoList, newToDoList.getToDoListID)
-            console.log(newList)
-            console.log(newProjectList)
             toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, newToDoList))
         }else{ //Add tasks to general todo list
             let currentListIndex = allTasks.getListLength()
@@ -614,12 +612,8 @@ submitBtn.addEventListener("click", (e)=>{
             allTasks.addTask(newTask)
             newList.addTask(newTask)
             storeToDoListInStorage(newList, newList.getToDoListID)
-            console.log(newList)
-            console.log(newProjectList)
             toDoListDiv.appendChild(GUI.displayTaskGUI(currentListIndex, allTasks))
         }
-        console.log(newList)
-        console.log(newProjectList)
         GUI.updateNumTasksGUI() 
         closeForm()
         e.preventDefault();  //Prevents form from sending data to backend by default

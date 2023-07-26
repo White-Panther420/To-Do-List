@@ -14,7 +14,7 @@ class Project{
         return this.projectList[projectToDoListIndex]
     }
     searchForProjectByID(toDoListID){
-        this.projectList.find(project => project.getToDoListID === toDoListID)
+        return this.projectList.find(project => project.getToDoListID === toDoListID)
     }
     getProjectListLength(){
         return this.projectList.length
