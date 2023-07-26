@@ -122,9 +122,6 @@ const GUI = (()=>{
                 //Update merged taskList
                 taskList.updateTaskInfo(taskTitle, taskDescr, taskDueDate, taskPriority, addedTaskID) 
             }
-            console.log(newList)
-            console.log(newProjectList)
-            console.log(taskList)
             updateTaskGUI(currentTaskContainer, taskTitle, taskDueDate)  //Update task GUI
 
             closeForm()
@@ -310,7 +307,7 @@ const projectGUI = (()=>{
         const projectsContainer = document.querySelector(".projectsContainer")
         const addProjectForm = createProjectForm("Add A Project", "Add")
         content.appendChild(addProjectForm)
-
+        
         const exitBtn = addProjectForm.querySelector(".exitBtn")
         exitBtn.addEventListener("click", ()=>{
             content.removeChild(addProjectForm)

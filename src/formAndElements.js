@@ -13,6 +13,12 @@ const createAnImg = (importedImage, className) =>{
 const createForm = (formTitle, submitBtnName)=>{
     const popUpForm = createAnElement("div", "popUpForm")
     
+    //Prevent form submission upon pressing Enter key
+    popUpForm.addEventListener('keypress', function(e) {
+        if (e.keyCode === 13) {
+          e.preventDefault();
+        }
+      });
     //Top of form
     const formTitleDiv = createFormTitleSection(formTitle)
 
@@ -44,7 +50,11 @@ const createForm = (formTitle, submitBtnName)=>{
 const createProjectForm = (formTitle, submitBtnName)=>{
     const addProjectFrom = createAnElement("div", "popUpForm")
     addProjectFrom.setAttribute("id", "addProjectFrom")
-
+    addProjectFrom.addEventListener('keypress', function(e) {
+        if (e.keyCode === 13) {
+          e.preventDefault();
+        }
+      });
     //Top of form
     const projectitleDiv = createFormTitleSection(formTitle)
 
